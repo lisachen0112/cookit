@@ -1,0 +1,30 @@
+services:
+  postgres:
+    container_name: postgres_sql_cookit
+    image: postgres
+    env_file:
+      - .env
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: cookit
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - 5432:5432
+    networks:
+      - cookit
+    restart: unless-stopped
+  mail-dev:
+    container_name: mail-dev-cookit
+    image: maildev/maildev
+    ports:
+      - 1080:1080
+      - 1025:1025
+
+networks:
+  cookit:
+    driver: bridge
+
+volumes:
+  postgres:
+    driver: local
