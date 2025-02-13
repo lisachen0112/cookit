@@ -1,6 +1,5 @@
 package dev.lschen.cookit.email;
 
-import dev.lschen.cookit.activation.ActivationToken;
 import dev.lschen.cookit.user.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;

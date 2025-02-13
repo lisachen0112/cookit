@@ -2,11 +2,9 @@ package dev.lschen.cookit.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.lschen.cookit.recipe.Recipe;
-import dev.lschen.cookit.recipe.SavedRecipe;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -41,12 +41,6 @@ application:
     jwt:
       secret-key: ${env.JWT_SECRET_KEY}
       expiration: 8640000
-  mailing:
-    frontend:
-      activation-url: http://localhost:4200/activate-account
-  file:
-    upload:
-      photo-output-path: ./uploads
 
 server:
   port: 8088

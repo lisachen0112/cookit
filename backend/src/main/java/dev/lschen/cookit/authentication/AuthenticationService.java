@@ -1,9 +1,7 @@
 package dev.lschen.cookit.authentication;
 
-import dev.lschen.cookit.activation.ActivationToken;
 import dev.lschen.cookit.activation.ActivationTokenService;
 import dev.lschen.cookit.email.EmailService;
-import dev.lschen.cookit.email.EmailTemplateName;
 import dev.lschen.cookit.user.User;
 import dev.lschen.cookit.user.UserRepository;
 import jakarta.mail.MessagingException;
@@ -11,9 +9,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
