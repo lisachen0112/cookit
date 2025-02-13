@@ -35,4 +35,7 @@ public class AuthenticationService {
         emailService.sendActivationEmail(user, activationCode);
     }
 
+    public void activateAccount(String token) throws MessagingException {
+        activationTokenService.verifyToken(token);
+    }
 }

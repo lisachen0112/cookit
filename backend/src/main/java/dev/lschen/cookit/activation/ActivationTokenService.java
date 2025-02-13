@@ -1,7 +1,11 @@
 package dev.lschen.cookit.activation;
 
+import dev.lschen.cookit.email.EmailService;
 import dev.lschen.cookit.user.User;
+import dev.lschen.cookit.user.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.SecureRandom;
@@ -12,6 +16,8 @@ import java.time.LocalDateTime;
 public class ActivationTokenService {
 
     private final ActivationTokenRepository activationTokenRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     public String generateToken(User user) {
         String generatedToken = generateActivationCode(6);
@@ -35,5 +41,25 @@ public class ActivationTokenService {
         }
 
         return codeBuilder.toString();
+    }
+
+    public void verifyToken(String token) throws MessagingException {
+        ActivationToken savedToken = activationTokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token does not exist"));
+
+        // token expired
+        if (LocalDateTime.now().isAfter(savedToken.getExpiresAt())) {
+            User user = savedToken.getUser();
+            var activationCode = generateToken(user);
+            emailService.sendActivationEmail(user, activationCode);
+            throw new RuntimeException("Token has expired. A new token has been sent");
+        }
+
+        var user = userRepository.findById(savedToken.getUser().getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        user.setEnabled(true);
+        userRepository.save(user);
+        savedToken.setValidatedAt(LocalDateTime.now());
+        activationTokenRepository.save(savedToken);
     }
 }
