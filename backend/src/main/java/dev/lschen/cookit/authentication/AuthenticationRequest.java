@@ -14,10 +14,10 @@ import lombok.Setter;
 public class AuthenticationRequest {
 
     // TODO - Implement email or username login
-    @Email(message = "Email is not well formatted")
-    @NotEmpty(message = "Email is mandatory")
-    @NotBlank(message = "Email is mandatory")
-    private String email;
+//    @Email(message = "Username is not well formatted")
+    @NotEmpty(message = "Username is mandatory")
+    @NotBlank(message = "Username is mandatory")
+    private String username;
 
     @NotEmpty(message = "Password is mandatory")
     @NotBlank(message = "Password is mandatory")

@@ -1,12 +1,9 @@
-package dev.lschen.cookit.recipe;
+package dev.lschen.cookit.ingredient;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import dev.lschen.cookit.recipe.Recipe;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @NoArgsConstructor
@@ -14,6 +11,7 @@ import lombok.Setter;
 @Table(name = "ingredients")
 @Getter
 @Setter
+@Builder
 public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,8 +20,10 @@ public class Ingredient {
     @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private int quantity;
 
+    @Column(nullable = false)
     private String measurement;
 
     @ManyToOne

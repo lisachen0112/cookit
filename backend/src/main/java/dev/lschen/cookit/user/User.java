@@ -45,14 +45,9 @@ public class User implements UserDetails {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdDate;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Recipe> uploadedRecipes;
-
-//    @ManyToMany()
-//    @JsonManagedReference
-//    private List<SavedRecipe> savedRecipes;
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
