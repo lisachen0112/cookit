@@ -43,6 +43,8 @@ public class ActivationTokenService {
         return codeBuilder.toString();
     }
 
+    // TODO - check if user is already verified
+    // TODO - implement better error handling for FE
     public void verifyToken(String token) throws MessagingException {
         ActivationToken savedToken = activationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Token does not exist"));
