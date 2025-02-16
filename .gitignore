@@ -39,3 +39,4 @@ out/
 ### Ignore .env file ###
 backend/.env
 .env
+.env.test

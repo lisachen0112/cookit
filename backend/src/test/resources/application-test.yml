@@ -1,0 +1,54 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/cookit_test
+    username: user
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop  # Automatically create and drop schema in tests
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  mail:
+    host: localhost
+    port: 1025
+    username: lschen
+    password: password
+    properties:
+      mail:
+        smtp:
+          trust: "*"
+        auth: true
+        starttls:
+          enable: true
+        connectiontimeout: 5000
+        timeout: 3000
+        writetimeout: 5000
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+springdoc:
+  default-produces-media-type: application/json
+
+application:
+  security:
+    jwt:
+      secret-key: qJBE0yvn+RmBzu8cLxaIP9HT+jFtG3eU5lZB9OAoZV0=
+      expiration: 8640000
+
+server:
+  port: 8088
+  servlet:
+    context-path: /api/v1
+
+
+logging:
+  level:
+    dev.lschen.cookit.security: TRACE
