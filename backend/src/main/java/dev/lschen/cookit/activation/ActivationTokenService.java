@@ -4,6 +4,7 @@ import dev.lschen.cookit.email.EmailService;
 import dev.lschen.cookit.user.User;
 import dev.lschen.cookit.user.UserRepository;
 import jakarta.mail.MessagingException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -45,6 +46,7 @@ public class ActivationTokenService {
 
     // TODO - check if user is already verified
     // TODO - implement better error handling for FE
+    @Transactional
     public void verifyToken(String token) throws MessagingException {
         ActivationToken savedToken = activationTokenRepository.findByToken(token)
                 .orElseThrow(() -> new RuntimeException("Token does not exist"));

@@ -30,7 +30,7 @@ public class RecipeController {
 //        return new ResponseEntity<>(recipeRepository.searchByTitleOrDescription(keyword), HttpStatus.OK);
 //    }
 
-//    @PutMapping("/{id}")
+//    @PatchMapping("/{id}")
 //    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe updatedRecipe) {
 //        Optional<Recipe> optionalRecipe = recipeRepository.findById(id);
 //        if (optionalRecipe.isEmpty()) {

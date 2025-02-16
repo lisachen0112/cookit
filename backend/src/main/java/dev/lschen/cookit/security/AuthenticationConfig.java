@@ -1,4 +1,4 @@
-package dev.lschen.cookit.config;
+package dev.lschen.cookit.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -13,8 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @RequiredArgsConstructor
-public class BeansConfig {
-
+public class AuthenticationConfig {
     private final UserDetailsService userDetailsService;
 
     @Bean
@@ -36,3 +35,4 @@ public class BeansConfig {
         return config.getAuthenticationManager();
     }
 }
+
