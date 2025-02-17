@@ -117,4 +117,16 @@ class RecipeControllerTest {
 
         verify(recipeService, times(1)).findById(1L);
     }
+
+    @Test
+    public void deleteRecipeByIdEndpointTest() throws Exception {
+
+        doNothing().when(recipeService).deleteById(anyLong());
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/{id}", 1L))
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        verify(recipeService, times(1)).deleteById(1L);
+    }
 }

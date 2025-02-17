@@ -29,6 +29,12 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.findById(id));
     }
 
+    @DeleteMapping("/{id}")
+    ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
+        recipeService.deleteById(id);
+        return ResponseEntity.accepted().build();
+    }
+
 //    @GetMapping("/search")
 //    ResponseEntity<List<Recipe>> searchRecipes(@RequestParam String keyword) {
 //        return new ResponseEntity<>(recipeRepository.searchByTitleOrDescription(keyword), HttpStatus.OK);
@@ -56,9 +62,5 @@ public class RecipeController {
 //        return ResponseEntity.ok(recipeRepository.save(existingRecipe));
 //    }
 //
-//    @ResponseStatus(HttpStatus.NO_CONTENT)
-//    @DeleteMapping("/{id}")
-//    void deleteRecipe(@PathVariable Long id) {
-//        recipeRepository.deleteById(id);
-//    }
+
 }
