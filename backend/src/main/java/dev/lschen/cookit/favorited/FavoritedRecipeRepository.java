@@ -1,12 +1,12 @@
-package dev.lschen.cookit.favorite;
+package dev.lschen.cookit.favorited;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-public interface FavoriteRecipeRepository extends JpaRepository<FavoriteRecipe, Long> {
+public interface FavoritedRecipeRepository extends JpaRepository<FavoritedRecipe, Long> {
     @Query("""
         SELECT (COUNT(*) > 0) AS isFavorited
-        FROM FavoriteRecipe r
+        FROM FavoritedRecipe r
         WHERE r.favoritedBy.username = :username
         AND r.recipe.recipeId = :recipeId
         """)

@@ -1,6 +1,6 @@
 package dev.lschen.cookit.recipe;
 
-import dev.lschen.cookit.favorite.FavoriteRecipeService;
+import dev.lschen.cookit.favorited.FavoritedRecipeService;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.security.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +41,7 @@ class RecipeControllerTest {
     JwtFilter jwtService;
 
     @MockitoBean
-    private FavoriteRecipeService favoriteService;
+    private FavoritedRecipeService favoriteService;
 
     @MockitoBean
     private Authentication authentication;
@@ -148,7 +148,7 @@ class RecipeControllerTest {
                 .andExpect(status().isAccepted())
                 .andReturn();
 
-        verify(favoriteService, times(1)).favoriteRecipe(anyLong(), any(Authentication.class));
+        verify(favoriteService, times(1)).addRecipeToFavorites(anyLong(), any(Authentication.class));
     }
 
     @Test
@@ -160,7 +160,7 @@ class RecipeControllerTest {
                 .andExpect(status().isNoContent())
                 .andReturn();
 
-        verify(favoriteService, times(1)).unfavoriteRecipe(anyLong(), any(Authentication.class));
+        verify(favoriteService, times(1)).removeRecipeFromFavorites(anyLong(), any(Authentication.class));
     }
 
 }

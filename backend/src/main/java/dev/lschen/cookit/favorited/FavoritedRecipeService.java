@@ -1,4 +1,4 @@
-package dev.lschen.cookit.favorite;
+package dev.lschen.cookit.favorited;
 
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeRepository;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.Objects;
 
 @Service
-public class FavoriteRecipeService {
+public class FavoritedRecipeService {
 
     RecipeRepository recipeRepository;
-    FavoriteRecipeRepository favoriteRecipeRepository;
+    FavoritedRecipeRepository favoritedRecipeRepository;
 
-    public void favoriteRecipe(Long recipeId, Authentication connectedUser) {
+    public void addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
         Recipe recipe = recipeRepository.findById(recipeId)
@@ -25,21 +25,21 @@ public class FavoriteRecipeService {
             throw new RuntimeException("Cannot save user's own recipe");
         }
 
-        if (favoriteRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
+        if (favoritedRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
             throw new RuntimeException("Recipe already favorited");
         }
-        FavoriteRecipe favoriteRecipe = FavoriteRecipe.builder()
+        FavoritedRecipe favoriteRecipe = FavoritedRecipe.builder()
                 .recipe(recipe)
                 .favoritedBy(user)
                 .build();
 
-        favoriteRecipeRepository.save(favoriteRecipe);
+        favoritedRecipeRepository.save(favoriteRecipe);
     }
 
-    public void unfavoriteRecipe(Long recipeId, Authentication connectedUser) {
+    public void removeRecipeFromFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
-        if (!favoriteRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
-            throw new RuntimeException("Recipe has not been favorited beforehand");
+        if (!favoritedRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
+            throw new RuntimeException("Recipe has to be added to favorites before it can be removed");
         }
     }
 }

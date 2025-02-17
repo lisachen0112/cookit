@@ -1,4 +1,4 @@
-package dev.lschen.cookit.favorite;
+package dev.lschen.cookit.favorited;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.recipe.Recipe;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name="favorites")
 @EntityListeners(AuditingEntityListener.class)
-public class FavoriteRecipe {
+public class FavoritedRecipe {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -29,7 +29,7 @@ public class FavoriteRecipe {
     private User favoritedBy;
 
     @ManyToOne
-    @JoinColumn(name = "favorited_recipe", nullable = false, updatable = false)
+    @JoinColumn(name = "recipe", nullable = false, updatable = false)
     @JsonIgnore
     private Recipe recipe;
 

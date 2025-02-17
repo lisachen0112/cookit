@@ -2,7 +2,7 @@ package dev.lschen.cookit.recipe;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import dev.lschen.cookit.favorite.FavoriteRecipe;
+import dev.lschen.cookit.favorited.FavoritedRecipe;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
@@ -56,5 +56,5 @@ public class Recipe {
     private LocalDateTime lastModifiedDate;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FavoriteRecipe> favoritedBy;
+    private List<FavoritedRecipe> favoritedBy;
 }
