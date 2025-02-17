@@ -29,7 +29,7 @@ public class ActivationTokenService {
                 .user(user)
                 .build();
         activationTokenRepository.save(token);
-        return generatedToken;
+        return token.getToken();
     }
 
     private String generateActivationCode(int length) {
@@ -59,8 +59,8 @@ public class ActivationTokenService {
             throw new RuntimeException("Token has expired. A new token has been sent");
         }
 
-        var user = userRepository.findById(savedToken.getUser().getUsername())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        var user = userRepository.findByUsername(savedToken.getUser().getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User associated with token does not exist"));
         user.setEnabled(true);
         userRepository.save(user);
         savedToken.setValidatedAt(LocalDateTime.now());
