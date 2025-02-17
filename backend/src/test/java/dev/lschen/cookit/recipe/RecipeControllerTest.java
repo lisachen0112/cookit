@@ -1,5 +1,6 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.favorite.FavoriteRecipeService;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.security.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -20,6 +22,7 @@ import static dev.lschen.cookit.utils.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -36,6 +39,12 @@ class RecipeControllerTest {
 
     @MockitoBean
     JwtFilter jwtService;
+
+    @MockitoBean
+    private FavoriteRecipeService favoriteService;
+
+    @MockitoBean
+    private Authentication authentication;
 
     Recipe recipe;
     RecipeRequest request;
@@ -90,6 +99,7 @@ class RecipeControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
+                .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn();
     }
@@ -125,6 +135,20 @@ class RecipeControllerTest {
                 .andReturn();
 
         verify(recipeService, times(1)).updateRecipe(anyLong(), any(RecipeRequest.class));
+    }
+
+    @Test
+    public void FavoriteRecipeEndpointTest() throws Exception {
+
+        when(authentication.getName()).thenReturn("user");
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/recipes/favorite/{recipe-id}", 1L)
+                .principal(authentication))
+                .andDo(print())
+                .andExpect(status().isAccepted())
+                .andReturn();
+
+        verify(favoriteService, times(1)).favoriteRecipe(anyLong(), any(Authentication.class));
     }
 
 }

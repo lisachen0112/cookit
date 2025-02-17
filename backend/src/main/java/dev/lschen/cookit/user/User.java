@@ -1,6 +1,7 @@
 package dev.lschen.cookit.user;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import dev.lschen.cookit.favorite.FavoriteRecipe;
 import dev.lschen.cookit.recipe.Recipe;
 import jakarta.persistence.*;
 import lombok.*;
@@ -48,6 +49,9 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Recipe> uploadedRecipes;
+
+    @OneToMany(mappedBy = "favoritedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteRecipe> favoritedRecipes;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

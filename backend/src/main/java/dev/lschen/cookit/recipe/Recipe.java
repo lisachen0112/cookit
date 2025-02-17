@@ -2,6 +2,7 @@ package dev.lschen.cookit.recipe;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import dev.lschen.cookit.favorite.FavoriteRecipe;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
@@ -41,7 +42,7 @@ public class Recipe {
     private String videoUrl;
 
     @ManyToOne
-    @JoinColumn(name = "created_by", nullable = false)
+    @JoinColumn(name = "created_by", nullable = false, updatable = false)
     @JsonBackReference
     @CreatedBy
     private User createdBy;
@@ -53,4 +54,7 @@ public class Recipe {
     @LastModifiedDate
     @Column(insertable = false)
     private LocalDateTime lastModifiedDate;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoriteRecipe> favoritedBy;
 }

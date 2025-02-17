@@ -1,8 +1,10 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.favorite.FavoriteRecipeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
+    private final FavoriteRecipeService favoriteService;
 
     @PostMapping()
     ResponseEntity<Long> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
@@ -46,5 +49,11 @@ public class RecipeController {
         return ResponseEntity.ok().build();
     }
 
-
+    @PostMapping("/favorite/{recipe-id}")
+    ResponseEntity<Void> favoriteRecipe(
+            @PathVariable("recipe-id") Long recipeId,
+            Authentication authentication) {
+        favoriteService.favoriteRecipe(recipeId, authentication);
+        return ResponseEntity.accepted().build();
+    }
 }
