@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -13,23 +14,16 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
 
     public Long createRecipe(RecipeRequest request) {
-        List<Ingredient> ingredients = request.ingredients().stream()
-                .map(ingredientRequest -> Ingredient.builder()
-                        .name(ingredientRequest.getName())
-                        .quantity(ingredientRequest.getQuantity())
-                        .measurement(ingredientRequest.getMeasurement())
-                        .build())
-                .toList();
 
         Recipe recipe = Recipe.builder()
                 .title(request.title())
                 .description(request.description())
                 .imageUrl(request.imageUrl())
                 .videoUrl(request.videoUrl())
-                .ingredients(ingredients)
+                .ingredients(request.ingredients())
                 .build();
 
-        ingredients.forEach(ingredient -> ingredient.setRecipe(recipe));
+        request.ingredients().forEach(ingredient -> ingredient.setRecipe(recipe));
 
         return recipeRepository.save(recipe).getRecipeId();
     }
@@ -47,5 +41,34 @@ public class RecipeService {
             throw new EntityNotFoundException("Recipe not found");
         }
         recipeRepository.deleteById(id);
+    }
+
+    public Recipe updateRecipe(Long id, RecipeRequest request) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+
+        if (!Objects.equals(recipe.getTitle(), request.title())) {
+            recipe.setTitle(request.title());
+        }
+        if (!Objects.equals(recipe.getDescription(), request.description())) {
+            recipe.setDescription(request.description());
+        }
+        if (!Objects.equals(recipe.getImageUrl(), request.imageUrl())) {
+            recipe.setImageUrl(request.imageUrl());
+        }
+        if (!Objects.equals(recipe.getVideoUrl(), request.videoUrl())) {
+            recipe.setVideoUrl(request.videoUrl());
+        }
+        if (!recipe.getIngredients().equals(request.ingredients())) {
+            updateIngredients(recipe, request.ingredients());
+        }
+
+        return recipeRepository.save(recipe);
+    }
+
+    private void updateIngredients(Recipe recipe, List<Ingredient> ingredients) {
+        recipe.getIngredients().clear();
+        ingredients.forEach(ingredient -> ingredient.setRecipe(recipe));
+        recipe.getIngredients().addAll(ingredients);
     }
 }

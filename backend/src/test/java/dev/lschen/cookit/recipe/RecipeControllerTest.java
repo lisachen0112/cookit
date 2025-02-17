@@ -94,17 +94,6 @@ class RecipeControllerTest {
                 .andReturn();
     }
 
-//    @Test
-//    public void updateRecipeEndpointTest() throws Exception {
-//
-//
-//        mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(asJsonString(request)))
-//                .andExpect(status().isOk())
-//                .andReturn();
-//    }
-
     @Test
     public void getRecipeByIdEndpointTest() throws Exception {
 
@@ -120,13 +109,22 @@ class RecipeControllerTest {
 
     @Test
     public void deleteRecipeByIdEndpointTest() throws Exception {
-
-        doNothing().when(recipeService).deleteById(anyLong());
-
         mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/{id}", 1L))
                 .andExpect(status().isAccepted())
                 .andReturn();
 
         verify(recipeService, times(1)).deleteById(1L);
     }
+
+    @Test
+    public void updateRecipeEndpointTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        verify(recipeService, times(1)).updateRecipe(anyLong(), any(RecipeRequest.class));
+    }
+
 }

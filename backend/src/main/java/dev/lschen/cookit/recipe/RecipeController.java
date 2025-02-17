@@ -40,27 +40,11 @@ public class RecipeController {
 //        return new ResponseEntity<>(recipeRepository.searchByTitleOrDescription(keyword), HttpStatus.OK);
 //    }
 
-//    @PatchMapping("/{id}")
-//    public ResponseEntity<Recipe> updateRecipe(@PathVariable Long id, @RequestBody Recipe updatedRecipe) {
-//        Optional<Recipe> optionalRecipe = recipeRepository.findById(id);
-//        if (optionalRecipe.isEmpty()) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        Recipe existingRecipe = optionalRecipe.get();
-//
-//        // Update the fields of the existing recipe
-//        existingRecipe.setTitle(updatedRecipe.getTitle());
-//        existingRecipe.setDescription(updatedRecipe.getDescription());
-//        existingRecipe.setImageUrl(updatedRecipe.getImageUrl());
-//        existingRecipe.setVideoUrl(updatedRecipe.getVideoUrl());
-//        existingRecipe.getIngredients().clear(); // Remove existing ingredients
-//        for (Ingredient ingredient : updatedRecipe.getIngredients()) {
-//            ingredient.setRecipe(existingRecipe); // Ensure the relationship is set
-//        }
-//        existingRecipe.getIngredients().addAll(updatedRecipe.getIngredients());
-//
-//        return ResponseEntity.ok(recipeRepository.save(existingRecipe));
-//    }
-//
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updateRecipe(@PathVariable Long id, @RequestBody RecipeRequest request) {
+        recipeService.updateRecipe(id, request);
+        return ResponseEntity.ok().build();
+    }
+
 
 }
