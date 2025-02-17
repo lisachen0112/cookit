@@ -24,6 +24,11 @@ public class RecipeController {
         return ResponseEntity.ok(recipeService.findAll());
     }
 
+    @GetMapping("/{id}")
+    ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
+        return ResponseEntity.ok(recipeService.findById(id));
+    }
+
 //    @GetMapping("/search")
 //    ResponseEntity<List<Recipe>> searchRecipes(@RequestParam String keyword) {
 //        return new ResponseEntity<>(recipeRepository.searchByTitleOrDescription(keyword), HttpStatus.OK);

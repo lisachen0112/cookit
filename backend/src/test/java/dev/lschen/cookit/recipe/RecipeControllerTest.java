@@ -19,7 +19,7 @@ import java.util.List;
 import static dev.lschen.cookit.utils.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -38,6 +38,7 @@ class RecipeControllerTest {
     JwtFilter jwtService;
 
     Recipe recipe;
+    RecipeRequest request;
 
     @BeforeEach
     void setUp() {
@@ -52,6 +53,22 @@ class RecipeControllerTest {
                 .imageUrl(null)
                 .videoUrl(null)
                 .build();
+
+
+        List<Ingredient> ingredients = new ArrayList<>();
+        ingredients.add(Ingredient.builder()
+                .ingredientId(1L)
+                .name("ingredient")
+                .quantity(10)
+                .measurement("measurement")
+                .recipe(recipe)
+                .build());
+        request = new RecipeRequest("title",
+                "description",
+                "imageURL",
+                "videoUrl",
+                ingredients
+        );
     }
 
     @Test
@@ -68,21 +85,6 @@ class RecipeControllerTest {
     @Test
     public void createRecipeEndpointTest() throws Exception {
 
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredients.add(Ingredient.builder()
-                        .ingredientId(1L)
-                        .name("ingredient")
-                        .quantity(10)
-                        .measurement("measurement")
-                        .recipe(recipe)
-                .build());
-        RecipeRequest request = new RecipeRequest("title",
-                "description",
-                "imageURL",
-                "videoUrl",
-                ingredients
-                );
-
         when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/recipes")
@@ -90,5 +92,29 @@ class RecipeControllerTest {
                         .content(asJsonString(request)))
                 .andExpect(status().isOk())
                 .andReturn();
+    }
+
+//    @Test
+//    public void updateRecipeEndpointTest() throws Exception {
+//
+//
+//        mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                        .content(asJsonString(request)))
+//                .andExpect(status().isOk())
+//                .andReturn();
+//    }
+
+    @Test
+    public void getRecipeByIdEndpointTest() throws Exception {
+
+        when(recipeService.findById(anyLong())).thenReturn(recipe);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/recipes/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(recipe)));
+
+        verify(recipeService, times(1)).findById(1L);
     }
 }

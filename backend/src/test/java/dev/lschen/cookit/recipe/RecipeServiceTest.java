@@ -1,6 +1,8 @@
 package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import jakarta.persistence.EntityNotFoundException;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,7 +13,9 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -83,5 +87,27 @@ class RecipeServiceTest {
         verify(recipeRepository, times(1)).findAll();
 
         assertThat(recipes).isEqualTo(List.of(recipe));
+    }
+
+    @Test
+    public void ReturnRecipeIfExists() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+
+        Recipe result = recipeService.findById(1L);
+
+        verify(recipeRepository, times(1)).findById(1L);
+
+        assertThat(result).isEqualTo(recipe);
+    }
+
+    @Test
+    public void ThrowExceptionIfRecipeNotFound() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> recipeService.findById(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Recipe not found");
+
+        verify(recipeRepository, times(1)).findById(1L);
     }
 }

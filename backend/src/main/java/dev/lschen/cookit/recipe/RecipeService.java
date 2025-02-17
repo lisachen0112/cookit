@@ -1,7 +1,9 @@
 package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,5 +37,9 @@ public class RecipeService {
 
     public List<Recipe> findAll() {
         return recipeRepository.findAll();
+    }
+
+    public Recipe findById(Long id) {
+        return recipeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
     }
 }
