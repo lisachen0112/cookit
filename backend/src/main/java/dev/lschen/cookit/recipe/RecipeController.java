@@ -13,7 +13,6 @@ import java.util.List;
 public class RecipeController {
 
     private final RecipeService recipeService;
-    private final RecipeRepository recipeRepository;
 
     @PostMapping()
     ResponseEntity<Long> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
@@ -22,7 +21,7 @@ public class RecipeController {
 
     @GetMapping
     ResponseEntity<List<Recipe>> getAll() {
-        return ResponseEntity.ok(recipeRepository.findAll());
+        return ResponseEntity.ok(recipeService.findAll());
     }
 
 //    @GetMapping("/search")

@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
+
 public record RecipeRequest (
 
         @NotNull(message = "Title is required")

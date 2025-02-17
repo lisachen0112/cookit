@@ -29,7 +29,11 @@ public class RecipeService {
                 .build();
 
         ingredients.forEach(ingredient -> ingredient.setRecipe(recipe));
-        recipeRepository.save(recipe);
-        return recipe.getRecipeId();
+
+        return recipeRepository.save(recipe).getRecipeId();
+    }
+
+    public List<Recipe> findAll() {
+        return recipeRepository.findAll();
     }
 }

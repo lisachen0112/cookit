@@ -1,6 +1,5 @@
 package dev.lschen.cookit.authentication;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.lschen.cookit.security.JwtFilter;
 import dev.lschen.cookit.user.User;
 import dev.lschen.cookit.user.UserRepository;
@@ -14,6 +13,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
+import static dev.lschen.cookit.utils.TestUtils.asJsonString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -37,14 +37,6 @@ class AuthenticationControllerTest {
 
     @MockitoBean
     UserRepository userRepository;
-
-    public static String asJsonString(final Object obj) {
-        try {
-            return new ObjectMapper().writeValueAsString(obj);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     @Test
     public void registerEndpointTest() throws Exception {
