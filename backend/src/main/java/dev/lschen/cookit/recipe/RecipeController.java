@@ -56,4 +56,12 @@ public class RecipeController {
         favoriteService.favoriteRecipe(recipeId, authentication);
         return ResponseEntity.accepted().build();
     }
+
+    @DeleteMapping("/favorite/{recipe-id}")
+    ResponseEntity<Void> unfavoriteRecipe(
+            @PathVariable("recipe-id") Long recipeId,
+            Authentication authentication) {
+        favoriteService.unfavoriteRecipe(recipeId, authentication);
+        return ResponseEntity.noContent().build();
+    }
 }

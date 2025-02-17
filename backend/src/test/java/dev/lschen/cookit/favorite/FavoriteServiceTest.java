@@ -144,5 +144,15 @@ class FavoriteServiceTest {
         verify(favoriteRepository, times(1)).save(any(FavoriteRecipe.class));
     }
 
+    @Test
+    public void ThrowExceptionWhenUnfavoringRecipeThatWasNotFavorited() {
+        when(favoriteRepository.recipeIsAlreadyFavorited(anyLong(), anyString())).thenReturn(false);
+
+        assertThatThrownBy(() -> favoriteService.unfavoriteRecipe(1L, authentication))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Recipe has not been favorited beforehand");
+
+        verify(favoriteRepository, times(1)).recipeIsAlreadyFavorited(anyLong(), anyString());
+    }
 
 }

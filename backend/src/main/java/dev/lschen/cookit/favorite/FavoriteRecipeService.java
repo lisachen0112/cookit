@@ -35,4 +35,11 @@ public class FavoriteRecipeService {
 
         favoriteRecipeRepository.save(favoriteRecipe);
     }
+
+    public void unfavoriteRecipe(Long recipeId, Authentication connectedUser) {
+        User user = (User) connectedUser.getPrincipal();
+        if (!favoriteRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
+            throw new RuntimeException("Recipe has not been favorited beforehand");
+        }
+    }
 }

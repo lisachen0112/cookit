@@ -151,4 +151,16 @@ class RecipeControllerTest {
         verify(favoriteService, times(1)).favoriteRecipe(anyLong(), any(Authentication.class));
     }
 
+    @Test
+    public void deleteFavoriteRecipeEndpointTest() throws Exception {
+        when(authentication.getName()).thenReturn("user");
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/favorite/{recipe-id}", 1L)
+                        .principal(authentication))
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        verify(favoriteService, times(1)).unfavoriteRecipe(anyLong(), any(Authentication.class));
+    }
+
 }
