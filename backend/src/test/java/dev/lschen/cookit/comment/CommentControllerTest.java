@@ -1,16 +1,24 @@
 package dev.lschen.cookit.comment;
 
 import dev.lschen.cookit.security.JwtFilter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.List;
+
+import static dev.lschen.cookit.utils.TestUtils.asJsonString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CommentController.class)
 @ActiveProfiles("test")
@@ -22,33 +30,74 @@ public class CommentControllerTest {
 
     @MockitoBean
     JwtFilter jwtService;
-//
-//    @BeforeEach
-//    void setUp() {
-//        Comment comment = new Comment();
-//    }
+
+    @MockitoBean
+    CommentService commentService;
+
+    Comment comment;
+    CommentRequest request;
+
+    @BeforeEach
+    void setUp() {
+        request = new CommentRequest("comment");
+        comment = Comment.builder()
+                .commentId(1L)
+                .content("content")
+                .build();
+    }
 
     @Test
-    public void getCommentsForRecipeEndpoint() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/recipes/comments/{id}", 1L))
+    public void getCommentsByIdEndpointTest() throws Exception {
+        when(commentService.getCommentById(anyLong())).thenReturn(comment);
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(comment)));
+        verify(commentService, times(1)).getCommentById(anyLong());
+    }
+
+    @Test
+    public void patchCommentByIdEndpointTest() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
                 .andExpect(status().isOk());
+
+        verify(commentService, times(1)).patchCommentById(any(CommentRequest.class), anyLong());
     }
 
     @Test
-    public void postCommentForRecipeEndpoint() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.post("/recipes/comments/{id}", 1L))
-                .andExpect(status().isCreated());
-    }
-
-    @Test
-    public void patchCommentForRecipeEndpoint() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/comments/{id}", 1L))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    public void deleteCommentForRecipeEndpoint() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/comments/{id}", 1L))
+    public void deleteCommentByIdEndpointTest() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L))
                 .andExpect(status().isNoContent());
+
+        verify(commentService, times(1)).deleteCommentById(anyLong());
+    }
+
+    @Test
+    public void getAllCommentsOfRecipeEndpointTest() throws Exception {
+        when(commentService.getAllCommentsForRecipe(anyLong())).thenReturn(List.of(comment));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(List.of(comment))));
+
+        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong());
+    }
+
+    @Test
+    public void postCommentForRecipeEndpointTest() throws Exception {
+        when(commentService.addComment(any(CommentRequest.class), anyLong())).thenReturn(comment);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/comments/recipe/{recipe-id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "comments/" + comment.getCommentId()));
+
+        verify(commentService, times(1)).addComment(any(CommentRequest.class), anyLong());
     }
 }
