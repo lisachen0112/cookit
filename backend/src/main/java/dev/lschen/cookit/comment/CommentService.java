@@ -1,7 +1,6 @@
 package dev.lschen.cookit.comment;
 
 import dev.lschen.cookit.recipe.Recipe;
-import dev.lschen.cookit.recipe.RecipeRepository;
 import dev.lschen.cookit.recipe.RecipeService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
