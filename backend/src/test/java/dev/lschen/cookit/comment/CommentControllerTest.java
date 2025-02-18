@@ -48,13 +48,13 @@ public class CommentControllerTest {
 
     @Test
     public void getCommentsByIdEndpointTest() throws Exception {
-        when(commentService.getCommentById(anyLong())).thenReturn(comment);
+        when(commentService.findById(anyLong())).thenReturn(comment);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(comment)));
-        verify(commentService, times(1)).getCommentById(anyLong());
+        verify(commentService, times(1)).findById(anyLong());
     }
 
     @Test
@@ -65,7 +65,7 @@ public class CommentControllerTest {
                         .content(asJsonString(request)))
                 .andExpect(status().isOk());
 
-        verify(commentService, times(1)).patchCommentById(any(CommentRequest.class), anyLong());
+        verify(commentService, times(1)).patchById(any(CommentRequest.class), anyLong());
     }
 
     @Test
@@ -73,7 +73,7 @@ public class CommentControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L))
                 .andExpect(status().isNoContent());
 
-        verify(commentService, times(1)).deleteCommentById(anyLong());
+        verify(commentService, times(1)).deleteById(anyLong());
     }
 
     @Test

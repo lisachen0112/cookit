@@ -16,13 +16,13 @@ public class CommentController {
 
     @GetMapping("/{comment-id}")
     ResponseEntity<Comment> getCommentById(@PathVariable("comment-id") Long commentId) {
-        Comment comment = commentService.getCommentById(commentId);
+        Comment comment = commentService.findById(commentId);
         return ResponseEntity.ok(comment);
     }
 
     @DeleteMapping("/{comment-id}")
     ResponseEntity<Void> deleteCommentById(@PathVariable("comment-id") Long commentId) {
-        commentService.deleteCommentById(commentId);
+        commentService.deleteById(commentId);
         return ResponseEntity.noContent().build();
     }
 
@@ -30,7 +30,7 @@ public class CommentController {
     ResponseEntity<Void> patchCommentForRecipe(
             @PathVariable("comment-id") Long commentId,
             @RequestBody CommentRequest request) {
-        commentService.patchCommentById(request, commentId);
+        commentService.patchById(request, commentId);
         return ResponseEntity.ok().build();
     }
 

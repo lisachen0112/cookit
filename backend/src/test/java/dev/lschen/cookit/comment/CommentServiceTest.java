@@ -65,7 +65,7 @@ class CommentServiceTest {
     public void throwErrorWhenGettingNonExistentComment() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> commentService.getCommentById(1L))
+        assertThatThrownBy(() -> commentService.findById(1L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Comment not found");
 
@@ -76,7 +76,7 @@ class CommentServiceTest {
     public void getCommentByIdTest() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
 
-        Comment result = commentService.getCommentById(1L);
+        Comment result = commentService.findById(1L);
         assertThat(result).isEqualTo(comment);
 
         verify(commentRepository, times(1)).findById(anyLong());
@@ -87,7 +87,7 @@ class CommentServiceTest {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Comment result = commentService.patchCommentById(request,1L);
+        Comment result = commentService.patchById(request,1L);
         assertThat("comment").isEqualTo(result.getContent());
 
         verify(commentRepository, times(1)).findById(anyLong());
@@ -97,7 +97,7 @@ class CommentServiceTest {
     @Test
     public void successfulDeleteComment() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
-        commentService.deleteCommentById(1L);
+        commentService.deleteById(1L);
         verify(commentRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).deleteById(anyLong());
         verifyNoMoreInteractions(commentRepository);

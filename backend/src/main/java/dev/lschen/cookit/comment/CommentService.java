@@ -25,19 +25,19 @@ public class CommentService {
         return commentRepository.save(comment);
     }
 
-    public Comment getCommentById(Long commentId) {
+    public Comment findById(Long commentId) {
         return commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
     }
 
-    public Comment patchCommentById(CommentRequest request, Long commentId) {
-        Comment comment = getCommentById(commentId);
+    public Comment patchById(CommentRequest request, Long commentId) {
+        Comment comment = findById(commentId);
         comment.setContent(request.content());
         return commentRepository.save(comment);
     }
 
-    public void deleteCommentById(Long commentId) {
-        getCommentById(commentId);
+    public void deleteById(Long commentId) {
+        findById(commentId);
         commentRepository.deleteById(commentId);
     }
 
