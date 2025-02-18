@@ -1,7 +1,6 @@
 package dev.lschen.cookit.recipe;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.favorited.FavoritedRecipe;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.user.User;
@@ -34,7 +33,6 @@ public class Recipe {
     private String description;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private List<Ingredient> ingredients;
 
     private String imageUrl;
@@ -43,7 +41,7 @@ public class Recipe {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    @JsonBackReference
+    @JsonIgnore
     @CreatedBy
     private User createdBy;
 

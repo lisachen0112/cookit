@@ -68,7 +68,7 @@ public class RecipeService {
 
     private void updateIngredients(Recipe recipe, List<Ingredient> ingredients) {
         recipe.getIngredients().clear();
-        ingredients.forEach(ingredient -> ingredient.setRecipe(recipe));
         recipe.getIngredients().addAll(ingredients);
+        recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
     }
 }

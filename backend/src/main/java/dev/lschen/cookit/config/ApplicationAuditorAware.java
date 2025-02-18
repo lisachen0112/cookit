@@ -1,7 +1,6 @@
 package dev.lschen.cookit.config;
 
 import dev.lschen.cookit.user.User;
-import dev.lschen.cookit.user.UserRepository;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,11 +11,6 @@ import java.util.Optional;
 
 @Component
 public class ApplicationAuditorAware implements AuditorAware<User> {
-    private final UserRepository userRepository;
-
-    public ApplicationAuditorAware(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
 
     @Override
     public Optional<User> getCurrentAuditor() {
@@ -28,7 +22,6 @@ public class ApplicationAuditorAware implements AuditorAware<User> {
             return Optional.empty();
         }
 
-        User userPrincipal = (User) authentication.getPrincipal();
-        return userRepository.findByUsername(userPrincipal.getUsername());
+        return Optional.of((User) authentication.getPrincipal());
     }
 }

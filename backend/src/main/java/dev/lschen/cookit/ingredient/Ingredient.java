@@ -1,6 +1,6 @@
 package dev.lschen.cookit.ingredient;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.recipe.Recipe;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,6 +28,6 @@ public class Ingredient {
 
     @ManyToOne
     @JoinColumn(name = "recipe_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnore
     private Recipe recipe;
 }
