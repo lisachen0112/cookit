@@ -28,13 +28,13 @@ import static org.mockito.Mockito.*;
 class FavoriteServiceTest {
 
     @InjectMocks
-    private FavoritedRecipeService favoriteService;
+    private FavoritedRecipeService favoritedService;
 
     @Mock
     private RecipeRepository recipeRepository;
 
     @Mock
-    private FavoritedRecipeRepository favoriteRepository;
+    private FavoritedRecipeRepository favoritedRepository;
 
     Authentication authentication;
     Recipe recipe;
@@ -78,7 +78,7 @@ class FavoriteServiceTest {
     public void ThrowExceptionWhenFavouringNonexistentRecipe() {
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> favoriteService.addRecipeToFavorites(1L, authentication))
+        assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Recipe not found");
 
@@ -91,7 +91,7 @@ class FavoriteServiceTest {
         recipe.setCreatedBy(mockUser);
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
 
-        assertThatThrownBy(() -> favoriteService.addRecipeToFavorites(1L, authentication))
+        assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Cannot save user's own recipe");
 
@@ -110,16 +110,16 @@ class FavoriteServiceTest {
                 .build();
         recipe.setCreatedBy(newUser);
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
-        when(favoriteRepository.recipeIsAlreadyFavorited(anyLong(), anyString())).thenReturn(true);
+        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
 
-        assertThatThrownBy(() -> favoriteService.addRecipeToFavorites(1L, authentication))
+        assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Recipe already favorited");
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(recipeRepository);
-        verify(favoriteRepository, times(1)).recipeIsAlreadyFavorited(anyLong(), anyString());
-        verifyNoMoreInteractions(favoriteRepository);
+        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verifyNoMoreInteractions(favoritedRepository);
     }
 
     @Test
@@ -134,25 +134,41 @@ class FavoriteServiceTest {
         recipe.setCreatedBy(newUser);
 
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
-        when(favoriteRepository.recipeIsAlreadyFavorited(anyLong(), anyString())).thenReturn(false);
+        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
 
-        favoriteService.addRecipeToFavorites(1L, authentication);
+        favoritedService.addRecipeToFavorites(1L, authentication);
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(recipeRepository);
-        verify(favoriteRepository, times(1)).recipeIsAlreadyFavorited(anyLong(), anyString());
-        verify(favoriteRepository, times(1)).save(any(FavoritedRecipe.class));
+        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(favoritedRepository, times(1)).save(any(FavoritedRecipe.class));
     }
 
     @Test
     public void ThrowExceptionWhenRemovingRecipeFromFavoritesIfItHasNotBeenFavoritedBeforehand() {
-        when(favoriteRepository.recipeIsAlreadyFavorited(anyLong(), anyString())).thenReturn(false);
+        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
 
-        assertThatThrownBy(() -> favoriteService.removeRecipeFromFavorites(1L, authentication))
+        assertThatThrownBy(() -> favoritedService.removeRecipeFromFavorites(1L, authentication))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Recipe has to be added to favorites before it can be removed");
 
-        verify(favoriteRepository, times(1)).recipeIsAlreadyFavorited(anyLong(), anyString());
+        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(recipeRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
+    public void SuccessfullyRemovedRecipeFromFavorites() {
+        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+
+        favoritedService.removeRecipeFromFavorites(1L, authentication);
+
+        verify(favoritedRepository, times(1)).
+                existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(favoritedRepository, times(1))
+                .deleteByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(recipeRepository, times(1)).findById(anyLong());
     }
 
 }

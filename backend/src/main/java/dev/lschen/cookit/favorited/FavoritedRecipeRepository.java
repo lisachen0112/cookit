@@ -1,14 +1,12 @@
 package dev.lschen.cookit.favorited;
 
+import dev.lschen.cookit.recipe.Recipe;
+import dev.lschen.cookit.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 
 public interface FavoritedRecipeRepository extends JpaRepository<FavoritedRecipe, Long> {
-    @Query("""
-        SELECT (COUNT(*) > 0) AS isFavorited
-        FROM FavoritedRecipe r
-        WHERE r.favoritedBy.username = :username
-        AND r.recipe.recipeId = :recipeId
-        """)
-    boolean recipeIsAlreadyFavorited(Long recipeId, String username);
+
+    boolean existsByRecipeAndFavoritedBy(Recipe recipe, User favoritedBy);
+
+    void deleteByRecipeAndFavoritedBy(Recipe recipe, User user);
 }

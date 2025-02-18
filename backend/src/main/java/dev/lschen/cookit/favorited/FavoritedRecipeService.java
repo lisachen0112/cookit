@@ -25,7 +25,7 @@ public class FavoritedRecipeService {
             throw new RuntimeException("Cannot save user's own recipe");
         }
 
-        if (favoritedRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
+        if (favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
             throw new RuntimeException("Recipe already favorited");
         }
         FavoritedRecipe favoriteRecipe = FavoritedRecipe.builder()
@@ -38,8 +38,14 @@ public class FavoritedRecipeService {
 
     public void removeRecipeFromFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
-        if (!favoritedRecipeRepository.recipeIsAlreadyFavorited(recipeId, user.getUsername())) {
+
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+
+        if (!favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
             throw new RuntimeException("Recipe has to be added to favorites before it can be removed");
         }
+
+        favoritedRecipeRepository.deleteByRecipeAndFavoritedBy(recipe, user);
     }
 }
