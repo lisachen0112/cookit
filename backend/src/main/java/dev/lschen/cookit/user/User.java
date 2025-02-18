@@ -1,6 +1,7 @@
 package dev.lschen.cookit.user;
 
-import dev.lschen.cookit.favorited.FavoritedRecipe;
+import dev.lschen.cookit.comment.Comment;
+import dev.lschen.cookit.favorite.Favorite;
 import dev.lschen.cookit.recipe.Recipe;
 import jakarta.persistence.*;
 import lombok.*;
@@ -49,7 +50,10 @@ public class User implements UserDetails {
     private List<Recipe> uploadedRecipes;
 
     @OneToMany(mappedBy = "favoritedBy", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FavoritedRecipe> favoritedRecipes;
+    private List<Favorite> favoritedRecipes;
+
+    @OneToMany(mappedBy = "commentedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

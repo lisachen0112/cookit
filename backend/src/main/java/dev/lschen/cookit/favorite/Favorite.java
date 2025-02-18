@@ -1,4 +1,4 @@
-package dev.lschen.cookit.favorited;
+package dev.lschen.cookit.favorite;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.recipe.Recipe;
@@ -18,7 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name="favorites")
 @EntityListeners(AuditingEntityListener.class)
-public class FavoritedRecipe {
+public class Favorite {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

@@ -1,4 +1,4 @@
-package dev.lschen.cookit.favorited;
+package dev.lschen.cookit.favorite;
 
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.recipe.Recipe;
@@ -28,13 +28,13 @@ import static org.mockito.Mockito.*;
 class FavoriteServiceTest {
 
     @InjectMocks
-    private FavoritedRecipeService favoritedService;
+    private FavoriteService favoritedService;
 
     @Mock
     private RecipeRepository recipeRepository;
 
     @Mock
-    private FavoritedRecipeRepository favoritedRepository;
+    private FavoriteRepository favoritedRepository;
 
     Authentication authentication;
     Recipe recipe;
@@ -141,7 +141,7 @@ class FavoriteServiceTest {
         verify(recipeRepository, times(1)).findById(anyLong());
         verifyNoMoreInteractions(recipeRepository);
         verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
-        verify(favoritedRepository, times(1)).save(any(FavoritedRecipe.class));
+        verify(favoritedRepository, times(1)).save(any(Favorite.class));
     }
 
     @Test

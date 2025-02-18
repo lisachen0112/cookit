@@ -1,7 +1,8 @@
 package dev.lschen.cookit.recipe;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import dev.lschen.cookit.favorited.FavoritedRecipe;
+import dev.lschen.cookit.comment.Comment;
+import dev.lschen.cookit.favorite.Favorite;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
@@ -54,5 +55,8 @@ public class Recipe {
     private LocalDateTime lastModifiedDate;
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FavoritedRecipe> favoritedBy;
+    private List<Favorite> favoritedBy;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
 }

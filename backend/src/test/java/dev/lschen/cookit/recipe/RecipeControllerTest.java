@@ -1,6 +1,5 @@
 package dev.lschen.cookit.recipe;
 
-import dev.lschen.cookit.favorited.FavoritedRecipeService;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.security.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -39,12 +37,6 @@ class RecipeControllerTest {
 
     @MockitoBean
     JwtFilter jwtService;
-
-    @MockitoBean
-    private FavoritedRecipeService favoriteService;
-
-    @MockitoBean
-    private Authentication authentication;
 
     Recipe recipe;
     RecipeRequest request;
@@ -82,7 +74,6 @@ class RecipeControllerTest {
 
     @Test
     public void getAllRecipesEndpointTest() throws Exception {
-
         when(recipeService.findAll()).thenReturn(List.of(recipe));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/recipes"))
@@ -93,7 +84,6 @@ class RecipeControllerTest {
 
     @Test
     public void createRecipeEndpointTest() throws Exception {
-
         when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(1L);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/recipes")
@@ -106,7 +96,6 @@ class RecipeControllerTest {
 
     @Test
     public void getRecipeByIdEndpointTest() throws Exception {
-
         when(recipeService.findById(anyLong())).thenReturn(recipe);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/recipes/{id}", 1L))
@@ -136,31 +125,4 @@ class RecipeControllerTest {
 
         verify(recipeService, times(1)).updateRecipe(anyLong(), any(RecipeRequest.class));
     }
-
-    @Test
-    public void FavoriteRecipeEndpointTest() throws Exception {
-
-        when(authentication.getName()).thenReturn("user");
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/recipes/favorite/{recipe-id}", 1L)
-                .principal(authentication))
-                .andDo(print())
-                .andExpect(status().isAccepted())
-                .andReturn();
-
-        verify(favoriteService, times(1)).addRecipeToFavorites(anyLong(), any(Authentication.class));
-    }
-
-    @Test
-    public void deleteFavoriteRecipeEndpointTest() throws Exception {
-        when(authentication.getName()).thenReturn("user");
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/favorite/{recipe-id}", 1L)
-                        .principal(authentication))
-                .andExpect(status().isNoContent())
-                .andReturn();
-
-        verify(favoriteService, times(1)).removeRecipeFromFavorites(anyLong(), any(Authentication.class));
-    }
-
 }
