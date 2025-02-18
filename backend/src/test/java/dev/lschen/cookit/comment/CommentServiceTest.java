@@ -2,6 +2,7 @@ package dev.lschen.cookit.comment;
 
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeService;
+import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +10,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
@@ -34,9 +37,15 @@ class CommentServiceTest {
     Comment comment;
     CommentRequest request;
     Recipe recipe;
+    Authentication authentication;
+    User user;
 
     @BeforeEach
     void setUp() {
+        user = User.builder()
+                .username("test1")
+                .build();
+
         request = new CommentRequest("comment");
         comment = Comment.builder()
                 .commentId(1L)
@@ -83,21 +92,67 @@ class CommentServiceTest {
     }
 
     @Test
-    public void successfulUpdateComment() {
+    public void throwErrorWhenUpdatingOtherUsersComment() {
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        User otherUser = User.builder()
+                .username("test2")
+                .build();
+        comment.setCommentedBy(otherUser);
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.patchById(request,1L, authentication))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Cannot update other users comment");
+
+        verify(commentRepository, times(1)).findById(anyLong());
+        verifyNoMoreInteractions(commentRepository);
+    }
+
+    @Test
+    public void successfulUpdateComment() {
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        comment.setCommentedBy(user);
+
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        when(authentication.getPrincipal()).thenReturn(user);
         when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Comment result = commentService.patchById(request,1L);
+        Comment result = commentService.patchById(request,1L, authentication);
         assertThat("comment").isEqualTo(result.getContent());
 
         verify(commentRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).save(any(Comment.class));
+        verifyNoMoreInteractions(commentRepository);
+    }
+
+    @Test
+    public void throwErrorWhenDeletingOtherUsersComment() {
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(authentication.getPrincipal()).thenReturn(user);
+        User otherUser = User.builder()
+                .username("test2")
+                .build();
+        comment.setCommentedBy(otherUser);
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+
+        assertThatThrownBy(() -> commentService.deleteById(1L, authentication))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Cannot delete other users comment");
+
+        verify(commentRepository, times(1)).findById(anyLong());
     }
 
     @Test
     public void successfulDeleteComment() {
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        comment.setCommentedBy(user);
+
+        when(authentication.getPrincipal()).thenReturn(user);
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
-        commentService.deleteById(1L);
+
+        commentService.deleteById(1L, authentication);
+
         verify(commentRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).deleteById(anyLong());
         verifyNoMoreInteractions(commentRepository);
@@ -116,7 +171,4 @@ class CommentServiceTest {
         verify(commentRepository, times(1)).findByRecipe(any(Recipe.class));
         verifyNoMoreInteractions(commentRepository);
     }
-
-
-
 }

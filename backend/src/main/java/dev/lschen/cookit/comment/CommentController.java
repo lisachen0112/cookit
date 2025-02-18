@@ -2,6 +2,7 @@ package dev.lschen.cookit.comment;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -21,16 +22,19 @@ public class CommentController {
     }
 
     @DeleteMapping("/{comment-id}")
-    ResponseEntity<Void> deleteCommentById(@PathVariable("comment-id") Long commentId) {
-        commentService.deleteById(commentId);
+    ResponseEntity<Void> deleteCommentById(
+            @PathVariable("comment-id") Long commentId,
+            Authentication authentication) {
+        commentService.deleteById(commentId, authentication);
         return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{comment-id}")
     ResponseEntity<Void> patchCommentForRecipe(
             @PathVariable("comment-id") Long commentId,
-            @RequestBody CommentRequest request) {
-        commentService.patchById(request, commentId);
+            @RequestBody CommentRequest request,
+            Authentication authentication) {
+        commentService.patchById(request, commentId, authentication);
         return ResponseEntity.ok().build();
     }
 

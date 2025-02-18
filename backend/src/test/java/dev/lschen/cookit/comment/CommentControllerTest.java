@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +34,9 @@ public class CommentControllerTest {
 
     @MockitoBean
     CommentService commentService;
+
+    @MockitoBean
+    private Authentication authentication;
 
     Comment comment;
     CommentRequest request;
@@ -61,19 +65,22 @@ public class CommentControllerTest {
     public void patchCommentByIdEndpointTest() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
+                        .principal(authentication)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
                 .andExpect(status().isOk());
 
-        verify(commentService, times(1)).patchById(any(CommentRequest.class), anyLong());
+        verify(commentService, times(1))
+                .patchById(any(CommentRequest.class), anyLong(), any(Authentication.class));
     }
 
     @Test
     public void deleteCommentByIdEndpointTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
+                        .principal(authentication))
                 .andExpect(status().isNoContent());
 
-        verify(commentService, times(1)).deleteById(anyLong());
+        verify(commentService, times(1)).deleteById(anyLong(), any(Authentication.class));
     }
 
     @Test
