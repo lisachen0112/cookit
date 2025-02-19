@@ -2,7 +2,9 @@ package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
+import dev.lschen.cookit.instruction.InstructionRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +14,9 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor
 public class RecipeService {
+
     private final RecipeRepository recipeRepository;
+    private final InstructionRepository instructionRepository;
 
     public Recipe createRecipe(RecipeRequest request) {
         Recipe recipe = Recipe.builder()
@@ -43,6 +47,7 @@ public class RecipeService {
         recipeRepository.deleteById(id);
     }
 
+    @Transactional
     public Recipe updateRecipe(Long id, RecipeRequest request) {
         Recipe recipe = findById(id);
 
@@ -70,9 +75,11 @@ public class RecipeService {
     }
 
     private void updateInstructions(Recipe recipe, List<Instruction> instructions) {
+        instructionRepository.deleteByRecipe(recipe);
+        instructionRepository.flush();
         recipe.getInstructions().clear();
+        instructions.forEach(instruction-> instruction.setRecipe(recipe));
         recipe.getInstructions().addAll(instructions);
-        recipe.getInstructions().forEach(instruction-> instruction.setRecipe(recipe));
     }
 
     private void updateIngredients(Recipe recipe, List<Ingredient> ingredients) {

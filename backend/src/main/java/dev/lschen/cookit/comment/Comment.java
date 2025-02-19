@@ -1,6 +1,5 @@
 package dev.lschen.cookit.comment;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
@@ -34,7 +33,6 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "commented_by", nullable = false, updatable = false)
-    @JsonIgnore
     @CreatedBy
     private User commentedBy;
 
@@ -44,6 +42,5 @@ public class Comment {
 
     @ManyToOne
     @JoinColumn(name = "recipe", nullable = false, updatable = false)
-    @JsonIgnore
     private Recipe recipe;
 }

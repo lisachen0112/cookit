@@ -2,6 +2,7 @@ package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
+import dev.lschen.cookit.instruction.InstructionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,13 +28,14 @@ class RecipeServiceTest {
     @Mock
     private RecipeRepository recipeRepository;
 
+    @Mock
+    private InstructionRepository instructionRepository;
+
     @InjectMocks
     private RecipeService recipeService;
 
     private Recipe recipe;
-
     private RecipeRequest request;
-
     private List<Ingredient> ingredients;
     private List<Instruction> instructions;
 
@@ -216,5 +218,6 @@ class RecipeServiceTest {
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, times(1)).save(any(Recipe.class));
+        verify(instructionRepository, times(1)).deleteByRecipe(any(Recipe.class));
     }
 }

@@ -32,7 +32,7 @@ public class Instruction {
 
     @ManyToOne
     @JoinColumn(name = "recipe_id", nullable = false)
-    @JsonBackReference
+    @JsonBackReference("instructions")
     private Recipe recipe;
 
     public enum ContentType {

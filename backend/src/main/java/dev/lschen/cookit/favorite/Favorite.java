@@ -1,6 +1,5 @@
 package dev.lschen.cookit.favorite;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
@@ -25,12 +24,10 @@ public class Favorite {
 
     @ManyToOne
     @JoinColumn(name = "favorited_by", nullable = false, updatable = false)
-    @JsonIgnore
     private User favoritedBy;
 
     @ManyToOne
     @JoinColumn(name = "recipe", nullable = false, updatable = false)
-    @JsonIgnore
     private Recipe recipe;
 
     @CreatedDate

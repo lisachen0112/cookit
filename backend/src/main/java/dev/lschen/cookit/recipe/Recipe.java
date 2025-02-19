@@ -1,5 +1,6 @@
 package dev.lschen.cookit.recipe;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.lschen.cookit.comment.Comment;
@@ -35,16 +36,30 @@ public class Recipe {
 
     private String description;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Ingredient> ingredients;
-
     private String imageUrl;
 
     private String videoUrl;
 
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("ingredients")
+    private List<Ingredient> ingredients;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Favorite> favoritedBy;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Comment> comments;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    @JsonManagedReference("instructions")
+    private List<Instruction> instructions;
+
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    @JsonIgnore
+    @JsonBackReference("recipe")
     @CreatedBy
     private User createdBy;
 
@@ -55,15 +70,4 @@ public class Recipe {
     @LastModifiedDate
     @Column(insertable = false)
     private LocalDateTime lastModifiedDate;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Favorite> favoritedBy;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("orderIndex ASC")
-    @JsonManagedReference
-    private List<Instruction> instructions;
 }
