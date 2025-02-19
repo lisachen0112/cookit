@@ -5,6 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
+
 @RestController
 @RequestMapping("recipes/favorites")
 @RequiredArgsConstructor
@@ -16,10 +18,9 @@ public class FavoriteController {
     ResponseEntity<Void> addRecipeToFavorites(
             @PathVariable("recipe-id") Long recipeId,
             Authentication authentication) {
-        favoriteService.addRecipeToFavorites(recipeId, authentication);
-        return ResponseEntity.created(null).build();
+        Favorite result = favoriteService.addRecipeToFavorites(recipeId, authentication);
+        return ResponseEntity.created(URI.create("/recipes/favorites/" + result.getId())).build();
     }
-
 
     @DeleteMapping("/{recipe-id}")
     ResponseEntity<Void> removeRecipeFromFavorites(

@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(FavoriteController.class)
@@ -35,11 +36,17 @@ public class FavoriteControllerTest {
 
     @Test
     public void addRecipeToFavoritesEndpoint() throws Exception {
+        Favorite favorite = Favorite.builder()
+                .id(1L)
+                .build();
+
         when(authentication.getName()).thenReturn("user");
-        mockMvc.perform(MockMvcRequestBuilders.post("/recipes/favorites/{id}", 1L)
+        when(favoriteService.addRecipeToFavorites(anyLong(), any(Authentication.class))).thenReturn(favorite);
+
+    mockMvc.perform(MockMvcRequestBuilders.post("/recipes/favorites/{id}", 1L)
                         .principal(authentication))
                 .andExpect(status().isCreated())
-                .andReturn();
+                .andExpect(header().string("Location", "/recipes/favorites/1"));
 
         verify(favoriteService, times(1)).addRecipeToFavorites(anyLong(), any(Authentication.class));
     }

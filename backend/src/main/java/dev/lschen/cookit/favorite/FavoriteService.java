@@ -17,7 +17,7 @@ public class FavoriteService {
     private final FavoriteRepository favoritedRecipeRepository;
     private final RecipeService recipeService;
 
-    public void addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
+    public Favorite addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
         Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
@@ -35,6 +35,7 @@ public class FavoriteService {
                 .build();
 
         favoritedRecipeRepository.save(favoriteRecipe);
+        return favoriteRecipe;
     }
 
     @Transactional

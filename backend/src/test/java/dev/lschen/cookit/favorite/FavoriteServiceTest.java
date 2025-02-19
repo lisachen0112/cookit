@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -119,15 +120,22 @@ class FavoriteServiceTest {
                 .build();
         recipe.setCreatedBy(newUser);
 
+        Favorite expected = Favorite.builder()
+                .recipe(recipe)
+                .favoritedBy(mockUser)
+                .build();
+
         when(recipeService.findRecipeOrThrowError(anyLong())).thenReturn(recipe);
         when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
 
-        favoritedService.addRecipeToFavorites(1L, authentication);
+        Favorite result = favoritedService.addRecipeToFavorites(1L, authentication);
 
         verify(recipeService, times(1)).findRecipeOrThrowError(anyLong());
         verifyNoMoreInteractions(recipeService);
         verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
         verify(favoritedRepository, times(1)).save(any(Favorite.class));
+        assertThat(result.getFavoritedBy()).isEqualTo(expected.getFavoritedBy());
+        assertThat(result.getRecipe()).isEqualTo(expected.getRecipe());
     }
 
     @Test
