@@ -34,11 +34,15 @@ class CommentServiceTest {
     @Mock
     private RecipeService recipeService;
 
+    @Mock
+    private CommentMapper commentMapper;
+
     Comment comment;
     CommentRequest request;
     Recipe recipe;
     Authentication authentication;
     User user;
+    CommentResponse commentResponse;
 
     @BeforeEach
     void setUp() {
@@ -54,12 +58,21 @@ class CommentServiceTest {
         recipe = Recipe.builder()
                 .title("title")
                 .build();
+
+        commentResponse = new CommentResponse(
+                1L,
+                "content",
+                null,
+                null,
+                null
+        );
     }
 
     @Test
     public void successfulAddComment() {
         when(recipeService.findById(anyLong())).thenReturn(recipe);
-        when(commentRepository.save(any())).thenReturn(comment);
+        when(commentMapper.toComment(any(CommentRequest.class), any(Recipe.class))).thenReturn(comment);
+        when(commentRepository.save(comment)).thenReturn(comment);
 
         Comment comment = commentService.addComment(request,1L);
         assertThat(comment.getContent()).isEqualTo("content");
@@ -84,11 +97,13 @@ class CommentServiceTest {
     @Test
     public void getCommentByIdTest() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
+        when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
 
-        Comment result = commentService.findById(1L);
-        assertThat(result).isEqualTo(comment);
+        CommentResponse response = commentService.findById(1L);
+        assertThat(response).isEqualTo(commentResponse);
 
         verify(commentRepository, times(1)).findById(anyLong());
+        verify(commentMapper, times(1)).toCommentResponse(any(Comment.class));
     }
 
     @Test
@@ -162,9 +177,10 @@ class CommentServiceTest {
     public void successfulGetAllCommentsForRecipe() {
         when(recipeService.findById(anyLong())).thenReturn(recipe);
         when(commentRepository.findByRecipe(any(Recipe.class))).thenReturn(List.of(comment));
+        when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
 
-        List<Comment> result = commentService.getAllCommentsForRecipe(1L);
-        assertThat(result).isEqualTo(List.of(comment));
+        List<CommentResponse> response = commentService.getAllCommentsForRecipe(1L);
+        assertThat(response).isEqualTo(List.of(commentResponse));
 
         verify(recipeService, times(1)).findById(anyLong());
         verifyNoMoreInteractions(recipeService);

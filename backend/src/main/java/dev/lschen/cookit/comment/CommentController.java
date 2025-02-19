@@ -16,9 +16,9 @@ public class CommentController {
     private final CommentService commentService;
 
     @GetMapping("/{comment-id}")
-    ResponseEntity<Comment> getCommentById(@PathVariable("comment-id") Long commentId) {
-        Comment comment = commentService.findById(commentId);
-        return ResponseEntity.ok(comment);
+    ResponseEntity<CommentResponse> getCommentById(@PathVariable("comment-id") Long commentId) {
+        CommentResponse response = commentService.findById(commentId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{comment-id}")
@@ -39,8 +39,8 @@ public class CommentController {
     }
 
     @GetMapping("/recipe/{recipe-id}")
-    ResponseEntity<List<Comment>> getCommentsForRecipe(@PathVariable("recipe-id") Long recipeId) {
-        List<Comment> comments = commentService.getAllCommentsForRecipe(recipeId);
+    ResponseEntity<List<CommentResponse>> getCommentsForRecipe(@PathVariable("recipe-id") Long recipeId) {
+        List<CommentResponse> comments = commentService.getAllCommentsForRecipe(recipeId);
         return ResponseEntity.ok(comments);
     }
 

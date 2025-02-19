@@ -40,6 +40,7 @@ public class CommentControllerTest {
 
     Comment comment;
     CommentRequest request;
+    CommentResponse commentResponse;
 
     @BeforeEach
     void setUp() {
@@ -48,16 +49,23 @@ public class CommentControllerTest {
                 .commentId(1L)
                 .content("content")
                 .build();
+        commentResponse = new CommentResponse(
+                1L,
+                "how many grams of pasta?",
+                null,
+                null,
+                null
+        );
     }
 
     @Test
     public void getCommentsByIdEndpointTest() throws Exception {
-        when(commentService.findById(anyLong())).thenReturn(comment);
+        when(commentService.findById(anyLong())).thenReturn(commentResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(comment)));
+                .andExpect(content().json(asJsonString(commentResponse)));
         verify(commentService, times(1)).findById(anyLong());
     }
 
@@ -85,12 +93,12 @@ public class CommentControllerTest {
 
     @Test
     public void getAllCommentsOfRecipeEndpointTest() throws Exception {
-        when(commentService.getAllCommentsForRecipe(anyLong())).thenReturn(List.of(comment));
+        when(commentService.getAllCommentsForRecipe(anyLong())).thenReturn(List.of(commentResponse));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(List.of(comment))));
+                .andExpect(content().json(asJsonString(List.of(commentResponse))));
 
         verify(commentService, times(1)).getAllCommentsForRecipe(anyLong());
     }

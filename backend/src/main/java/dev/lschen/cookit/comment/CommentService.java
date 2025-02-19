@@ -17,24 +17,24 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final RecipeService recipeService;
+    private final CommentMapper commentMapper;
 
     public Comment addComment(CommentRequest request, Long recipeId) {
         Recipe recipe = recipeService.findById(recipeId);
-        Comment comment = Comment.builder()
-                .content(request.content())
-                .recipe(recipe)
-                .build();
+        Comment comment = commentMapper.toComment(request, recipe);
 
         return commentRepository.save(comment);
     }
 
-    public Comment findById(Long commentId) {
-        return commentRepository.findById(commentId)
+    public CommentResponse findById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
+        return commentMapper.toCommentResponse(comment);
     }
 
     public Comment patchById(CommentRequest request, Long commentId, Authentication authentication) {
-        Comment comment = findById(commentId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
         User user = (User) authentication.getPrincipal();
         if (!Objects.equals(user.getUsername(), comment.getCommentedBy().getUsername())) {
             throw new RuntimeException("Cannot update other users comment");
@@ -44,7 +44,8 @@ public class CommentService {
     }
 
     public void deleteById(Long commentId, Authentication authentication) {
-        Comment comment = findById(commentId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
         User user = (User) authentication.getPrincipal();
         if (!Objects.equals(user.getUsername(), comment.getCommentedBy().getUsername())) {
             throw new RuntimeException("Cannot delete other users comment");
@@ -52,9 +53,11 @@ public class CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    public List<Comment> getAllCommentsForRecipe(Long recipeId) {
+    public List<CommentResponse> getAllCommentsForRecipe(Long recipeId) {
         Recipe recipe = recipeService.findById(recipeId);
-
-        return commentRepository.findByRecipe(recipe);
+        List<Comment> comments = commentRepository.findByRecipe(recipe);
+        return comments.stream()
+                .map(commentMapper::toCommentResponse)
+                .toList();
     }
 }
