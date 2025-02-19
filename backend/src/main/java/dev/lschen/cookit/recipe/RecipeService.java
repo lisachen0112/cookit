@@ -1,6 +1,7 @@
 package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.Instruction;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,19 +14,20 @@ import java.util.Objects;
 public class RecipeService {
     private final RecipeRepository recipeRepository;
 
-    public Long createRecipe(RecipeRequest request) {
-
+    public Recipe createRecipe(RecipeRequest request) {
         Recipe recipe = Recipe.builder()
                 .title(request.title())
                 .description(request.description())
                 .imageUrl(request.imageUrl())
                 .videoUrl(request.videoUrl())
                 .ingredients(request.ingredients())
+                .instructions(request.instructions())
                 .build();
 
-        request.ingredients().forEach(ingredient -> ingredient.setRecipe(recipe));
+        recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
+        recipe.getInstructions().forEach(instruction -> instruction.setRecipe(recipe));
 
-        return recipeRepository.save(recipe).getRecipeId();
+        return recipeRepository.save(recipe);
     }
 
     public List<Recipe> findAll() {
@@ -37,15 +39,12 @@ public class RecipeService {
     }
 
     public void deleteById(Long id) {
-        if (!recipeRepository.existsById(id)) {
-            throw new EntityNotFoundException("Recipe not found");
-        }
+        findById(id);
         recipeRepository.deleteById(id);
     }
 
     public Recipe updateRecipe(Long id, RecipeRequest request) {
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        Recipe recipe = findById(id);
 
         if (!Objects.equals(recipe.getTitle(), request.title())) {
             recipe.setTitle(request.title());
@@ -63,7 +62,17 @@ public class RecipeService {
             updateIngredients(recipe, request.ingredients());
         }
 
+        if (!recipe.getInstructions().equals(request.instructions())) {
+            updateInstructions(recipe, request.instructions());
+        }
+
         return recipeRepository.save(recipe);
+    }
+
+    private void updateInstructions(Recipe recipe, List<Instruction> instructions) {
+        recipe.getInstructions().clear();
+        recipe.getInstructions().addAll(instructions);
+        recipe.getInstructions().forEach(instruction-> instruction.setRecipe(recipe));
     }
 
     private void updateIngredients(Recipe recipe, List<Ingredient> ingredients) {

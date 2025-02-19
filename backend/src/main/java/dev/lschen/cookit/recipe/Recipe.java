@@ -1,9 +1,11 @@
 package dev.lschen.cookit.recipe;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.lschen.cookit.comment.Comment;
 import dev.lschen.cookit.favorite.Favorite;
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -59,4 +61,9 @@ public class Recipe {
 
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("orderIndex ASC")
+    @JsonManagedReference
+    private List<Instruction> instructions;
 }

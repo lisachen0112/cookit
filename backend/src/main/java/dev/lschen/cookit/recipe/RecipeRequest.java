@@ -1,6 +1,7 @@
 package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.Instruction;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -17,8 +18,10 @@ public record RecipeRequest (
         String imageUrl,
         String videoUrl,
 
-        @NotEmpty(message = "Add at least one ingredient")
         @Valid
-        List<Ingredient> ingredients
+        List<Ingredient> ingredients,
+
+        @Valid
+        List<Instruction> instructions
 ) {
 }

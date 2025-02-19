@@ -1,6 +1,5 @@
 package dev.lschen.cookit.recipe;
 
-import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.security.JwtFilter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,14 +12,12 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static dev.lschen.cookit.utils.TestUtils.asJsonString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
@@ -47,28 +44,14 @@ class RecipeControllerTest {
                 .recipeId(1L)
                 .title("title")
                 .description("description")
-                .createdBy(null)
-                .createdDate(null)
-                .lastModifiedDate(null)
-                .ingredients(List.of())
-                .imageUrl(null)
-                .videoUrl(null)
                 .build();
 
-
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredients.add(Ingredient.builder()
-                .ingredientId(1L)
-                .name("ingredient")
-                .quantity(10)
-                .measurement("measurement")
-                .recipe(recipe)
-                .build());
         request = new RecipeRequest("title",
                 "description",
                 "imageURL",
                 "videoUrl",
-                ingredients
+                null,
+                null
         );
     }
 
@@ -80,18 +63,22 @@ class RecipeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(1)));
+
+        verify(recipeService, times(1)).findAll();
+        verifyNoMoreInteractions(recipeService);
     }
 
     @Test
     public void createRecipeEndpointTest() throws Exception {
-        when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(1L);
+        when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(recipe);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/recipes/1"));
+
+        verify(recipeService, times(1)).createRecipe(any(RecipeRequest.class));
     }
 
     @Test
@@ -109,7 +96,7 @@ class RecipeControllerTest {
     @Test
     public void deleteRecipeByIdEndpointTest() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/{id}", 1L))
-                .andExpect(status().isAccepted())
+                .andExpect(status().isNoContent())
                 .andReturn();
 
         verify(recipeService, times(1)).deleteById(1L);

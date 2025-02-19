@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -15,8 +16,9 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     @PostMapping()
-    ResponseEntity<Long> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
-        return ResponseEntity.ok(recipeService.createRecipe(recipe));
+    ResponseEntity<Void> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
+        Recipe result = recipeService.createRecipe(recipe);
+        return ResponseEntity.created(URI.create("/recipes/" + result.getRecipeId())).build();
     }
 
     @GetMapping
@@ -32,7 +34,7 @@ public class RecipeController {
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteRecipe(@PathVariable Long id) {
         recipeService.deleteById(id);
-        return ResponseEntity.accepted().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}")

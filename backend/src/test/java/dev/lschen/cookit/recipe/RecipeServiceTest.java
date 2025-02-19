@@ -1,6 +1,7 @@
 package dev.lschen.cookit.recipe;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.Instruction;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ class RecipeServiceTest {
     private RecipeRequest request;
 
     private List<Ingredient> ingredients;
+    private List<Instruction> instructions;
 
     @BeforeEach
     void setUp() {
@@ -41,12 +43,8 @@ class RecipeServiceTest {
                 .recipeId(1L)
                 .title("title")
                 .description("description")
-                .createdBy(null)
-                .createdDate(null)
-                .lastModifiedDate(null)
                 .ingredients(new ArrayList<>())
-                .imageUrl("imageURL")
-                .videoUrl("videoUrl")
+                .instructions(new ArrayList<>())
                 .build();
 
         ingredients = new ArrayList<>();
@@ -66,30 +64,41 @@ class RecipeServiceTest {
                 .build());
         recipe.getIngredients().addAll(ingredients);
 
+        instructions = new ArrayList<>();
+        instructions.add(Instruction.builder()
+                        .recipe(recipe)
+                        .orderIndex(0)
+                        .content("Step 1")
+                        .type(Instruction.ContentType.TITLE)
+                .build());
+        recipe.getInstructions().addAll(instructions);
 
         request = new RecipeRequest("title",
                 "description",
                 "imageURL",
                 "videoUrl",
-                ingredients
+                ingredients,
+                instructions
         );
     }
 
     @Test
     public void RecipeCreatedCorrectlyFromRequest() {
+        when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        when(recipeRepository.save(any(Recipe.class))).thenReturn(recipe);
+        Recipe result = recipeService.createRecipe(request);
+        System.out.println(result);
 
-        Long recipeId = recipeService.createRecipe(request);
+        assertThat(result.getTitle()).isEqualTo(request.title());
+        assertThat(result.getDescription()).isEqualTo(request.description());
+        assertThat(result.getIngredients().size()).isEqualTo(ingredients.size());
+        assertThat(result.getInstructions().size()).isEqualTo(instructions.size());
 
         verify(recipeRepository, times(1)).save(any(Recipe.class));
-
-        assertThat(recipeId).isEqualTo(1L);
     }
 
     @Test
     public void GetAllRecipesFromRepository() {
-
         when(recipeRepository.findAll()).thenReturn(List.of(recipe));
 
         List<Recipe> recipes = recipeService.findAll();
@@ -97,17 +106,6 @@ class RecipeServiceTest {
         verify(recipeRepository, times(1)).findAll();
 
         assertThat(recipes).isEqualTo(List.of(recipe));
-    }
-
-    @Test
-    public void ReturnRecipeIfExists() {
-        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
-
-        Recipe result = recipeService.findById(1L);
-
-        verify(recipeRepository, times(1)).findById(1L);
-
-        assertThat(result).isEqualTo(recipe);
     }
 
     @Test
@@ -122,25 +120,36 @@ class RecipeServiceTest {
     }
 
     @Test
-    public void DeleteRecipeIfExists() {
-        when(recipeRepository.existsById(anyLong())).thenReturn(true);
+    public void ReturnRecipeIfExists() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
 
-        recipeService.deleteById(1L);
+        Recipe result = recipeService.findById(1L);
 
-        verify(recipeRepository, times(1)).existsById(1L);
-        verify(recipeRepository, times(1)).deleteById(1L);
+        verify(recipeRepository, times(1)).findById(1L);
 
+        assertThat(result).isEqualTo(recipe);
     }
 
     @Test
     public void ThrowExceptionWhenTryingToDeleteNonexistentRecipe() {
-        when(recipeRepository.existsById(anyLong())).thenReturn(false);
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> recipeService.deleteById(1L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Recipe not found");
 
-        verify(recipeRepository, times(1)).existsById(1L);
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verify(recipeRepository, times(0)).deleteById(anyLong());
+    }
+
+    @Test
+    public void DeleteRecipeIfExists() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+
+        recipeService.deleteById(1L);
+
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verify(recipeRepository, times(1)).deleteById(anyLong());
     }
 
     @Test
@@ -152,32 +161,49 @@ class RecipeServiceTest {
                 .hasMessageContaining("Recipe not found");
 
         verify(recipeRepository, times(1)).findById(anyLong());
+        verify(recipeRepository, times(0)).save(any(Recipe.class));
     }
 
     @Test
     public void UpdateRecipeIfExists() {
+        List<Ingredient> newIngredients = new ArrayList<>();
+        newIngredients.add(Ingredient.builder()
+                .ingredientId(1L)
+                .name("ingredient1")
+                .quantity(10)
+                .measurement("grams")
+                .build());
+
+        List<Instruction> newInstructions = new ArrayList<>();
+        newInstructions.add(Instruction.builder()
+                .orderIndex(0)
+                .content("Wash veggies")
+                .type(Instruction.ContentType.TEXT)
+                .build());
 
         RecipeRequest updateRequest = new RecipeRequest("new title",
                 "new description",
                 "newImageUrl",
                 "newVideoUrl",
-                ingredients);
+                newIngredients,
+                newInstructions);
 
         Recipe expectedRecipe = Recipe.builder()
                 .recipeId(1L)
                 .title(updateRequest.title())
+                .imageUrl(updateRequest.imageUrl())
+                .videoUrl(updateRequest.videoUrl())
                 .description(updateRequest.description())
-                .createdBy(null)
-                .createdDate(null)
-                .lastModifiedDate(null)
-                .ingredients(ingredients)
-                .imageUrl(null)
-                .videoUrl(null)
+                .ingredients(newIngredients)
+                .instructions(newInstructions)
                 .build();
-        ingredients.forEach(ingredient -> ingredient.setRecipe(expectedRecipe));
+        newIngredients.forEach(ingredient -> ingredient.setRecipe(expectedRecipe));
+        newInstructions.forEach(instruction -> instruction.setRecipe(expectedRecipe));
+
 
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
-        when(recipeRepository.save(any(Recipe.class))).thenReturn(expectedRecipe);
+        when(recipeRepository.save(any(Recipe.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         Recipe newRecipe = recipeService.updateRecipe(1L, updateRequest);
 
@@ -186,6 +212,7 @@ class RecipeServiceTest {
         assertThat(newRecipe.getImageUrl()).isEqualTo(expectedRecipe.getImageUrl());
         assertThat(newRecipe.getVideoUrl()).isEqualTo(expectedRecipe.getVideoUrl());
         assertThat(newRecipe.getIngredients()).isEqualTo(expectedRecipe.getIngredients());
+        assertThat(newRecipe.getInstructions()).isEqualTo(expectedRecipe.getInstructions());
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, times(1)).save(any(Recipe.class));
