@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.List;
 
 import static dev.lschen.cookit.utils.TestUtils.asJsonString;
-import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -37,7 +36,7 @@ class RecipeControllerTest {
 
     Recipe recipe;
     RecipeRequest request;
-
+    RecipeResponse response;
     @BeforeEach
     void setUp() {
         recipe = Recipe.builder()
@@ -48,8 +47,20 @@ class RecipeControllerTest {
 
         request = new RecipeRequest("title",
                 "description",
-                "imageURL",
+                "imageUrl",
                 "videoUrl",
+                null,
+                null
+        );
+        response = new RecipeResponse(
+                1L,
+                "title",
+                "description",
+                "imageUrl",
+                "videoUrl",
+                null,
+                null,
+                null,
                 null,
                 null
         );
@@ -57,20 +68,19 @@ class RecipeControllerTest {
 
     @Test
     public void getAllRecipesEndpointTest() throws Exception {
-        when(recipeService.findAll()).thenReturn(List.of(recipe));
+        when(recipeService.findAll()).thenReturn(List.of(response));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/recipes"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$", hasSize(1)));
+                .andExpect(content().json(asJsonString(List.of(response))));
 
         verify(recipeService, times(1)).findAll();
-        verifyNoMoreInteractions(recipeService);
     }
 
     @Test
     public void createRecipeEndpointTest() throws Exception {
-        when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(recipe);
+        when(recipeService.createRecipe(any(RecipeRequest.class))).thenReturn(response);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/recipes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -83,12 +93,12 @@ class RecipeControllerTest {
 
     @Test
     public void getRecipeByIdEndpointTest() throws Exception {
-        when(recipeService.findById(anyLong())).thenReturn(recipe);
+        when(recipeService.findById(anyLong())).thenReturn(response);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/recipes/{id}", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(recipe)));
+                .andExpect(content().json(asJsonString(response)));
 
         verify(recipeService, times(1)).findById(1L);
     }
@@ -104,11 +114,13 @@ class RecipeControllerTest {
 
     @Test
     public void updateRecipeEndpointTest() throws Exception {
+        when(recipeService.updateRecipe(anyLong(), any(RecipeRequest.class))).thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
                 .andExpect(status().isOk())
-                .andReturn();
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(response)));
 
         verify(recipeService, times(1)).updateRecipe(anyLong(), any(RecipeRequest.class));
     }

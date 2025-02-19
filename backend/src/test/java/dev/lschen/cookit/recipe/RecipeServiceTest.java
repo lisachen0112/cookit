@@ -31,13 +31,15 @@ class RecipeServiceTest {
     @Mock
     private InstructionRepository instructionRepository;
 
+    @Mock
+    private RecipeMapper recipeMapper;
+
     @InjectMocks
     private RecipeService recipeService;
 
     private Recipe recipe;
     private RecipeRequest request;
-    private List<Ingredient> ingredients;
-    private List<Instruction> instructions;
+    private RecipeResponse response;
 
     @BeforeEach
     void setUp() {
@@ -49,7 +51,7 @@ class RecipeServiceTest {
                 .instructions(new ArrayList<>())
                 .build();
 
-        ingredients = new ArrayList<>();
+        List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(Ingredient.builder()
                 .ingredientId(1L)
                 .name("ingredient1")
@@ -66,7 +68,7 @@ class RecipeServiceTest {
                 .build());
         recipe.getIngredients().addAll(ingredients);
 
-        instructions = new ArrayList<>();
+        List<Instruction> instructions = new ArrayList<>();
         instructions.add(Instruction.builder()
                         .recipe(recipe)
                         .orderIndex(0)
@@ -82,19 +84,34 @@ class RecipeServiceTest {
                 ingredients,
                 instructions
         );
+
+        response = new RecipeResponse(
+                1L,
+                "title",
+                "description",
+                null,
+                null,
+                ingredients,
+                instructions,
+                null,
+                null,
+                null
+        );
     }
 
     @Test
     public void RecipeCreatedCorrectlyFromRequest() {
-        when(recipeRepository.save(any(Recipe.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(recipeMapper.toRecipe(any(RecipeRequest.class))).thenReturn(recipe);
+        when(recipeRepository.save(any(Recipe.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        Recipe result = recipeService.createRecipe(request);
-        System.out.println(result);
+        RecipeResponse result = recipeService.createRecipe(request);
 
-        assertThat(result.getTitle()).isEqualTo(request.title());
-        assertThat(result.getDescription()).isEqualTo(request.description());
-        assertThat(result.getIngredients().size()).isEqualTo(ingredients.size());
-        assertThat(result.getInstructions().size()).isEqualTo(instructions.size());
+        assertThat(result.title()).isEqualTo(request.title());
+        assertThat(result.description()).isEqualTo(request.description());
+        assertThat(result.ingredients().size()).isEqualTo(request.ingredients().size());
+        assertThat(result.instructions().size()).isEqualTo(request.instructions().size());
 
         verify(recipeRepository, times(1)).save(any(Recipe.class));
     }
@@ -102,12 +119,12 @@ class RecipeServiceTest {
     @Test
     public void GetAllRecipesFromRepository() {
         when(recipeRepository.findAll()).thenReturn(List.of(recipe));
+        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        List<Recipe> recipes = recipeService.findAll();
+        List<RecipeResponse> results = recipeService.findAll();
 
         verify(recipeRepository, times(1)).findAll();
-
-        assertThat(recipes).isEqualTo(List.of(recipe));
+        assertThat(results).isEqualTo(List.of(response));
     }
 
     @Test
@@ -124,12 +141,12 @@ class RecipeServiceTest {
     @Test
     public void ReturnRecipeIfExists() {
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        Recipe result = recipeService.findById(1L);
+        RecipeResponse result = recipeService.findById(1L);
 
         verify(recipeRepository, times(1)).findById(1L);
-
-        assertThat(result).isEqualTo(recipe);
+        assertThat(result).isEqualTo(response);
     }
 
     @Test
@@ -183,13 +200,13 @@ class RecipeServiceTest {
                 .type(Instruction.ContentType.TEXT)
                 .build());
 
-        RecipeRequest updateRequest = new RecipeRequest("new title",
+        RecipeRequest updateRequest = new RecipeRequest(
+                "new title",
                 "new description",
                 "newImageUrl",
                 "newVideoUrl",
                 newIngredients,
                 newInstructions);
-
         Recipe expectedRecipe = Recipe.builder()
                 .recipeId(1L)
                 .title(updateRequest.title())
@@ -202,19 +219,32 @@ class RecipeServiceTest {
         newIngredients.forEach(ingredient -> ingredient.setRecipe(expectedRecipe));
         newInstructions.forEach(instruction -> instruction.setRecipe(expectedRecipe));
 
+        RecipeResponse expectedResponse = new RecipeResponse(
+                1L,
+                "new title",
+                "new description",
+                "newImageUrl",
+                "newVideoUrl",
+                newIngredients,
+                newInstructions,
+                null,
+                null,
+                null
+        );
 
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
         when(recipeRepository.save(any(Recipe.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
+        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(expectedResponse);
 
-        Recipe newRecipe = recipeService.updateRecipe(1L, updateRequest);
+        RecipeResponse newRecipe = recipeService.updateRecipe(1L, updateRequest);
 
-        assertThat(newRecipe.getTitle()).isEqualTo(expectedRecipe.getTitle());
-        assertThat(newRecipe.getDescription()).isEqualTo(expectedRecipe.getDescription());
-        assertThat(newRecipe.getImageUrl()).isEqualTo(expectedRecipe.getImageUrl());
-        assertThat(newRecipe.getVideoUrl()).isEqualTo(expectedRecipe.getVideoUrl());
-        assertThat(newRecipe.getIngredients()).isEqualTo(expectedRecipe.getIngredients());
-        assertThat(newRecipe.getInstructions()).isEqualTo(expectedRecipe.getInstructions());
+        assertThat(newRecipe.title()).isEqualTo(expectedResponse.title());
+        assertThat(newRecipe.description()).isEqualTo(expectedResponse.description());
+        assertThat(newRecipe.imageUrl()).isEqualTo(expectedResponse.imageUrl());
+        assertThat(newRecipe.videoUrl()).isEqualTo(expectedResponse.videoUrl());
+        assertThat(newRecipe.ingredients()).isEqualTo(expectedResponse.ingredients());
+        assertThat(newRecipe.instructions()).isEqualTo(expectedResponse.instructions());
 
         verify(recipeRepository, times(1)).findById(anyLong());
         verify(recipeRepository, times(1)).save(any(Recipe.class));

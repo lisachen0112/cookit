@@ -20,7 +20,7 @@ public class FavoriteService {
     public void addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
-        Recipe recipe = recipeService.findById(recipeId);
+        Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
 
         if (Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
             throw new RuntimeException("Cannot save user's own recipe");
@@ -41,7 +41,7 @@ public class FavoriteService {
     public void removeRecipeFromFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
-        Recipe recipe = recipeService.findById(recipeId);
+        Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
 
         if (!favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
             throw new RuntimeException("Recipe has to be added to favorites before it can be removed");

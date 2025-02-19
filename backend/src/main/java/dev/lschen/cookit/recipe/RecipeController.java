@@ -15,19 +15,19 @@ public class RecipeController {
 
     private final RecipeService recipeService;
 
-    @PostMapping()
-    ResponseEntity<Void> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
-        Recipe result = recipeService.createRecipe(recipe);
-        return ResponseEntity.created(URI.create("/recipes/" + result.getRecipeId())).build();
-    }
-
     @GetMapping
-    ResponseEntity<List<Recipe>> getAll() {
+    ResponseEntity<List<RecipeResponse>> getAll() {
         return ResponseEntity.ok(recipeService.findAll());
     }
 
+    @PostMapping()
+    ResponseEntity<Void> createRecipe(@RequestBody @Valid RecipeRequest recipe) {
+        RecipeResponse response = recipeService.createRecipe(recipe);
+        return ResponseEntity.created(URI.create("/recipes/" + response.recipeId())).build();
+    }
+
     @GetMapping("/{id}")
-    ResponseEntity<Recipe> getRecipeById(@PathVariable Long id) {
+    ResponseEntity<RecipeResponse> getRecipeById(@PathVariable Long id) {
         return ResponseEntity.ok(recipeService.findById(id));
     }
 
@@ -38,8 +38,7 @@ public class RecipeController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateRecipe(@PathVariable Long id, @RequestBody RecipeRequest request) {
-        recipeService.updateRecipe(id, request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable Long id, @RequestBody RecipeRequest request) {
+        return ResponseEntity.ok(recipeService.updateRecipe(id, request));
     }
 }
