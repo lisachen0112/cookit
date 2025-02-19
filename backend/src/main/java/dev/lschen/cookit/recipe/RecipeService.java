@@ -1,11 +1,14 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
+import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,8 +54,13 @@ public class RecipeService {
     }
 
     @Transactional
-    public RecipeResponse updateRecipe(Long id, RecipeRequest request) {
+    public RecipeResponse updateRecipe(Long id, RecipeRequest request, Authentication authentication) {
         Recipe recipe = findRecipeOrThrowError(id);
+
+        User user = (User) authentication.getPrincipal();
+        if (!Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
+            throw new OperationNotPermittedException("Cannot modify other users recipes");
+        }
 
         if (!Objects.equals(recipe.getTitle(), request.title())) {
             recipe.setTitle(request.title());

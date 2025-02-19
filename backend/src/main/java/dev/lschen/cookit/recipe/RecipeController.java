@@ -3,6 +3,7 @@ package dev.lschen.cookit.recipe;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -38,7 +39,10 @@ public class RecipeController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<RecipeResponse> updateRecipe(@PathVariable Long id, @RequestBody RecipeRequest request) {
-        return ResponseEntity.ok(recipeService.updateRecipe(id, request));
+    public ResponseEntity<RecipeResponse> updateRecipe(
+            @PathVariable Long id,
+            @RequestBody RecipeRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(recipeService.updateRecipe(id, request, authentication));
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,6 +34,9 @@ class RecipeControllerTest {
 
     @MockitoBean
     JwtFilter jwtService;
+
+    @MockitoBean
+    private Authentication authentication;
 
     Recipe recipe;
     RecipeRequest request;
@@ -114,14 +118,17 @@ class RecipeControllerTest {
 
     @Test
     public void updateRecipeEndpointTest() throws Exception {
-        when(recipeService.updateRecipe(anyLong(), any(RecipeRequest.class))).thenReturn(response);
+        when(recipeService.updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class)))
+                .thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
+                        .principal(authentication)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(response)));
 
-        verify(recipeService, times(1)).updateRecipe(anyLong(), any(RecipeRequest.class));
+        verify(recipeService, times(1))
+                .updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class));
     }
 }

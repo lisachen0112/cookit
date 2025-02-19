@@ -1,8 +1,10 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
+import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +12,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -40,9 +44,14 @@ class RecipeServiceTest {
     private Recipe recipe;
     private RecipeRequest request;
     private RecipeResponse response;
+    private Authentication authentication;
+    private User user;
 
     @BeforeEach
     void setUp() {
+        user = User.builder()
+                .username("test1")
+                .build();
         recipe = Recipe.builder()
                 .recipeId(1L)
                 .title("title")
@@ -175,7 +184,7 @@ class RecipeServiceTest {
     public void ThrowExceptionWhenTryingToUpdateNonexistentRecipe() {
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> recipeService.updateRecipe(1L, request))
+        assertThatThrownBy(() -> recipeService.updateRecipe(1L, request, authentication))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Recipe not found");
 
@@ -184,7 +193,25 @@ class RecipeServiceTest {
     }
 
     @Test
+    public void throwExceptionWhenTryingToUpdateOtherUserRecipe() {
+        User otherUser = new User();
+        recipe.setCreatedBy(otherUser);
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+        when(authentication.getPrincipal()).thenReturn(user);
+
+        assertThatThrownBy(() -> recipeService.updateRecipe(1L, request, authentication))
+                .isInstanceOf(OperationNotPermittedException.class)
+                .hasMessageContaining("Cannot modify other users recipes");
+
+        verify(recipeRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
     public void UpdateRecipeIfExists() {
+        authentication = mock(UsernamePasswordAuthenticationToken.class);
+        recipe.setCreatedBy(user);
+
         List<Ingredient> newIngredients = new ArrayList<>();
         newIngredients.add(Ingredient.builder()
                 .ingredientId(1L)
@@ -233,11 +260,12 @@ class RecipeServiceTest {
         );
 
         when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
+        when(authentication.getPrincipal()).thenReturn(user);
         when(recipeRepository.save(any(Recipe.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(expectedResponse);
 
-        RecipeResponse newRecipe = recipeService.updateRecipe(1L, updateRequest);
+        RecipeResponse newRecipe = recipeService.updateRecipe(1L, updateRequest, authentication);
 
         assertThat(newRecipe.title()).isEqualTo(expectedResponse.title());
         assertThat(newRecipe.description()).isEqualTo(expectedResponse.description());
