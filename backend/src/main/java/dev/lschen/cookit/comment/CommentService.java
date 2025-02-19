@@ -1,7 +1,7 @@
 package dev.lschen.cookit.comment;
 
 import dev.lschen.cookit.recipe.Recipe;
-import dev.lschen.cookit.recipe.RecipeService;
+import dev.lschen.cookit.recipe.RecipeRepository;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,14 +16,16 @@ import java.util.Objects;
 public class CommentService {
 
     private final CommentRepository commentRepository;
-    private final RecipeService recipeService;
+    private final RecipeRepository recipeRepository;
     private final CommentMapper commentMapper;
 
-    public Comment addComment(CommentRequest request, Long recipeId) {
-        Recipe recipe = recipeService.findById(recipeId);
-        Comment comment = commentMapper.toComment(request, recipe);
+    public CommentResponse addComment(CommentRequest request, Long recipeId) {
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
 
-        return commentRepository.save(comment);
+        Comment comment = commentMapper.toComment(request, recipe);
+        commentRepository.save(comment);
+        return commentMapper.toCommentResponse(comment);
     }
 
     public CommentResponse findById(Long commentId) {
@@ -32,7 +34,7 @@ public class CommentService {
         return commentMapper.toCommentResponse(comment);
     }
 
-    public Comment patchById(CommentRequest request, Long commentId, Authentication authentication) {
+    public CommentResponse patchById(CommentRequest request, Long commentId, Authentication authentication) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new EntityNotFoundException("Comment not found"));
         User user = (User) authentication.getPrincipal();
@@ -40,7 +42,8 @@ public class CommentService {
             throw new RuntimeException("Cannot update other users comment");
         }
         comment.setContent(request.content());
-        return commentRepository.save(comment);
+        commentRepository.save(comment);
+        return commentMapper.toCommentResponse(comment);
     }
 
     public void deleteById(Long commentId, Authentication authentication) {
@@ -54,8 +57,9 @@ public class CommentService {
     }
 
     public List<CommentResponse> getAllCommentsForRecipe(Long recipeId) {
-        Recipe recipe = recipeService.findById(recipeId);
-        List<Comment> comments = commentRepository.findByRecipe(recipe);
+        Recipe recipe = recipeRepository.findById(recipeId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
+        List<Comment> comments = recipe.getComments();
         return comments.stream()
                 .map(commentMapper::toCommentResponse)
                 .toList();

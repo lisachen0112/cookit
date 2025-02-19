@@ -30,12 +30,12 @@ public class CommentController {
     }
 
     @PatchMapping("/{comment-id}")
-    ResponseEntity<Void> patchCommentForRecipe(
+    ResponseEntity<CommentResponse> patchCommentForRecipe(
             @PathVariable("comment-id") Long commentId,
             @RequestBody CommentRequest request,
             Authentication authentication) {
-        commentService.patchById(request, commentId, authentication);
-        return ResponseEntity.ok().build();
+        CommentResponse response = commentService.patchById(request, commentId, authentication);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/recipe/{recipe-id}")
@@ -48,8 +48,8 @@ public class CommentController {
     ResponseEntity<Void> postCommentForRecipe(
             @PathVariable("recipe-id") Long recipeId,
             @RequestBody CommentRequest request) {
-        Comment comment = commentService.addComment(request, recipeId);
-        URI location = URI.create("comments/" + comment.getCommentId());
+        CommentResponse response = commentService.addComment(request, recipeId);
+        URI location = URI.create("comments/" + response.commentId());
         return ResponseEntity.created(location).build();
     }
 }

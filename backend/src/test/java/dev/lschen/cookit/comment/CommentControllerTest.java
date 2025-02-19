@@ -71,12 +71,15 @@ public class CommentControllerTest {
 
     @Test
     public void patchCommentByIdEndpointTest() throws Exception {
-
+        when(commentService.patchById(any(CommentRequest.class), anyLong(), any(Authentication.class)))
+                .thenReturn(commentResponse);
         mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
                         .principal(authentication)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(commentResponse)));
 
         verify(commentService, times(1))
                 .patchById(any(CommentRequest.class), anyLong(), any(Authentication.class));
@@ -105,7 +108,7 @@ public class CommentControllerTest {
 
     @Test
     public void postCommentForRecipeEndpointTest() throws Exception {
-        when(commentService.addComment(any(CommentRequest.class), anyLong())).thenReturn(comment);
+        when(commentService.addComment(any(CommentRequest.class), anyLong())).thenReturn(commentResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/comments/recipe/{recipe-id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON)

@@ -1,7 +1,7 @@
 package dev.lschen.cookit.comment;
 
 import dev.lschen.cookit.recipe.Recipe;
-import dev.lschen.cookit.recipe.RecipeService;
+import dev.lschen.cookit.recipe.RecipeRepository;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +32,7 @@ class CommentServiceTest {
     private CommentRepository commentRepository;
 
     @Mock
-    private RecipeService recipeService;
+    private RecipeRepository recipeRepository;
 
     @Mock
     private CommentMapper commentMapper;
@@ -50,10 +50,10 @@ class CommentServiceTest {
                 .username("test1")
                 .build();
 
-        request = new CommentRequest("comment");
+        request = new CommentRequest("new comment");
         comment = Comment.builder()
                 .commentId(1L)
-                .content("content")
+                .content("new comment")
                 .build();
         recipe = Recipe.builder()
                 .title("title")
@@ -61,7 +61,7 @@ class CommentServiceTest {
 
         commentResponse = new CommentResponse(
                 1L,
-                "content",
+                "new comment",
                 null,
                 null,
                 null
@@ -69,16 +69,28 @@ class CommentServiceTest {
     }
 
     @Test
+    public void throwErrorWhenAddingCommentOnNonExistentRecipe() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.addComment(request, 1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Recipe not found");
+
+        verifyNoInteractions(commentRepository);
+    }
+
+    @Test
     public void successfulAddComment() {
-        when(recipeService.findById(anyLong())).thenReturn(recipe);
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
         when(commentMapper.toComment(any(CommentRequest.class), any(Recipe.class))).thenReturn(comment);
         when(commentRepository.save(comment)).thenReturn(comment);
+        when(commentMapper.toCommentResponse(comment)).thenReturn(commentResponse);
 
-        Comment comment = commentService.addComment(request,1L);
-        assertThat(comment.getContent()).isEqualTo("content");
+        CommentResponse response = commentService.addComment(request,1L);
+        assertThat(response.content()).isEqualTo("new comment");
 
-        verify(recipeService, times(1)).findById(anyLong());
-        verifyNoMoreInteractions(recipeService);
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verifyNoMoreInteractions(recipeRepository);
         verify(commentRepository, times(1)).save(any(Comment.class));
         verifyNoMoreInteractions(commentRepository);
     }
@@ -97,13 +109,25 @@ class CommentServiceTest {
     @Test
     public void getCommentByIdTest() {
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
-        when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
+        when(commentMapper.toCommentResponse(comment)).thenReturn(commentResponse);
 
         CommentResponse response = commentService.findById(1L);
         assertThat(response).isEqualTo(commentResponse);
 
         verify(commentRepository, times(1)).findById(anyLong());
-        verify(commentMapper, times(1)).toCommentResponse(any(Comment.class));
+        verify(commentMapper, times(1)).toCommentResponse(comment);
+    }
+
+    @Test
+    public void throwErrorWhenUpdatingNonExistentComment() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> commentService.patchById(request, 1L, authentication))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Comment not found");
+
+        verify(commentRepository, times(1)).findById(anyLong());
+        verifyNoMoreInteractions(commentRepository);
     }
 
     @Test
@@ -126,19 +150,40 @@ class CommentServiceTest {
 
     @Test
     public void successfulUpdateComment() {
+        CommentRequest updateRequest = new CommentRequest("updated comment");
+        CommentResponse updatedCommentResponse = new CommentResponse(
+                1L,
+                "updated comment",
+                null,
+                null,
+                null
+        );
         authentication = mock(UsernamePasswordAuthenticationToken.class);
         comment.setCommentedBy(user);
 
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(comment));
         when(authentication.getPrincipal()).thenReturn(user);
-        when(commentRepository.save(any(Comment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(commentRepository.save(any(Comment.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+        when(commentMapper.toCommentResponse(any(Comment.class)))
+                .thenReturn(updatedCommentResponse);
 
-        Comment result = commentService.patchById(request,1L, authentication);
-        assertThat("comment").isEqualTo(result.getContent());
+        CommentResponse response = commentService.patchById(updateRequest,1L, authentication);
+        assertThat("updated comment").isEqualTo(response.content());
 
         verify(commentRepository, times(1)).findById(anyLong());
         verify(commentRepository, times(1)).save(any(Comment.class));
         verifyNoMoreInteractions(commentRepository);
+    }
+
+    @Test
+    public void throwErrorWhenDeletingNonExistentComment() {
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> commentService.deleteById(1L, authentication))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Comment not found");
+
+        verify(commentRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -174,17 +219,24 @@ class CommentServiceTest {
     }
 
     @Test
+    public void throwErrorWhenRetrievingAllCommentsOnNonExistentRecipe() {
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> commentService.getAllCommentsForRecipe(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Recipe not found");
+        verify(recipeRepository, times(1)).findById(anyLong());
+    }
+
+    @Test
     public void successfulGetAllCommentsForRecipe() {
-        when(recipeService.findById(anyLong())).thenReturn(recipe);
-        when(commentRepository.findByRecipe(any(Recipe.class))).thenReturn(List.of(comment));
+        recipe.setComments(List.of(comment));
+        when(recipeRepository.findById(anyLong())).thenReturn(Optional.of(recipe));
         when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
 
         List<CommentResponse> response = commentService.getAllCommentsForRecipe(1L);
         assertThat(response).isEqualTo(List.of(commentResponse));
 
-        verify(recipeService, times(1)).findById(anyLong());
-        verifyNoMoreInteractions(recipeService);
-        verify(commentRepository, times(1)).findByRecipe(any(Recipe.class));
-        verifyNoMoreInteractions(commentRepository);
+        verify(recipeRepository, times(1)).findById(anyLong());
+        verifyNoMoreInteractions(recipeRepository);
     }
 }
