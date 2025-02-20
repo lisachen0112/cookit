@@ -28,6 +28,14 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     public void register(@Valid RegistrationRequest request) throws MessagingException {
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists.");
+        }
+
         var user = User.builder()
                 .username(request.getUsername())
                 .firstName(request.getFirstName())

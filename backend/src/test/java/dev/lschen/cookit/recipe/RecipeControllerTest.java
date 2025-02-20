@@ -1,6 +1,8 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.handler.ExceptionResponse;
 import dev.lschen.cookit.security.JwtFilter;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.web.servlet.View;
 
 import java.util.List;
 
@@ -41,6 +44,9 @@ class RecipeControllerTest {
     Recipe recipe;
     RecipeRequest request;
     RecipeResponse response;
+    @Autowired
+    private View error;
+
     @BeforeEach
     void setUp() {
         recipe = Recipe.builder()
@@ -117,7 +123,7 @@ class RecipeControllerTest {
     }
 
     @Test
-    public void updateRecipeEndpointTest() throws Exception {
+    public void updateRecipeEndpointSuccessTest() throws Exception {
         when(recipeService.updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class)))
                 .thenReturn(response);
         mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
@@ -127,6 +133,27 @@ class RecipeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(response)));
+
+        verify(recipeService, times(1))
+                .updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class));
+    }
+
+    @Test
+    public void updateRecipeEndpointFailsOnNonExistentRecipeTest() throws Exception {
+        String errorMsg = "Recipe not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(recipeService.updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class)))
+                .thenThrow(new EntityNotFoundException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/recipes/{id}", 1L)
+                        .principal(authentication)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
 
         verify(recipeService, times(1))
                 .updateRecipe(anyLong(), any(RecipeRequest.class), any(Authentication.class));

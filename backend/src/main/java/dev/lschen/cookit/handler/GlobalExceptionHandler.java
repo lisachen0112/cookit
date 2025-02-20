@@ -5,6 +5,7 @@ import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -16,6 +17,17 @@ import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ExceptionResponse> handleException(DisabledException e) {
+        return ResponseEntity
+                .status(UNAUTHORIZED)
+                .body(
+                        ExceptionResponse.builder()
+                                .error(e.getMessage())
+                                .build()
+                );
+    }
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ExceptionResponse> handleException(BadCredentialsException e) {
@@ -37,6 +49,11 @@ public class GlobalExceptionHandler {
                                 .error(e.getMessage())
                                 .build()
                 );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(BAD_REQUEST).body(ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
