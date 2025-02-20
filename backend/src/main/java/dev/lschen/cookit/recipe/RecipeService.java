@@ -22,7 +22,7 @@ public class RecipeService {
     private final InstructionRepository instructionRepository;
     private final RecipeMapper recipeMapper;
 
-    public Recipe findRecipeOrThrowError(Long id) {
+    public Recipe findRecipeOrThrowException(Long id) {
         return recipeRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Recipe not found"));
     }
@@ -44,18 +44,18 @@ public class RecipeService {
     }
 
     public RecipeResponse findById(Long id) {
-        Recipe recipe = findRecipeOrThrowError(id);
+        Recipe recipe = findRecipeOrThrowException(id);
         return recipeMapper.toRecipeResponse(recipe);
     }
 
     public void deleteById(Long id) {
-        findRecipeOrThrowError(id);
+        findRecipeOrThrowException(id);
         recipeRepository.deleteById(id);
     }
 
     @Transactional
     public RecipeResponse updateRecipe(Long id, RecipeRequest request, Authentication authentication) {
-        Recipe recipe = findRecipeOrThrowError(id);
+        Recipe recipe = findRecipeOrThrowException(id);
 
         User user = (User) authentication.getPrincipal();
         if (!Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {

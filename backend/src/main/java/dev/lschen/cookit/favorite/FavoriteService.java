@@ -21,7 +21,7 @@ public class FavoriteService {
     public Favorite addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
-        Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
+        Recipe recipe = recipeService.findRecipeOrThrowException(recipeId);
 
         if (Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
             throw new OperationNotPermittedException("Cannot save user's own recipe");
@@ -43,7 +43,7 @@ public class FavoriteService {
     public void removeRecipeFromFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
 
-        Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
+        Recipe recipe = recipeService.findRecipeOrThrowException(recipeId);
 
         if (!favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
             throw new OperationNotPermittedException("Recipe has to be added to favorites before it can be removed");

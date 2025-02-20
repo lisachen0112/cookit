@@ -1,6 +1,9 @@
 package dev.lschen.cookit.comment;
 
+import dev.lschen.cookit.exception.OperationNotPermittedException;
+import dev.lschen.cookit.handler.ExceptionResponse;
 import dev.lschen.cookit.security.JwtFilter;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +62,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void getCommentsByIdEndpointTest() throws Exception {
+    public void shouldReturnOkWhenRetrievingCommentSuccessfully() throws Exception {
         when(commentService.findById(anyLong())).thenReturn(commentResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
@@ -70,7 +73,22 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void patchCommentByIdEndpointTest() throws Exception {
+    public void shouldReturnNotFoundWhenRetrievingNonexistentComment() throws Exception {
+        String errorMsg = "Comment not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(commentService.findById(anyLong()))
+                .thenThrow(new EntityNotFoundException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+    }
+
+    @Test
+    public void shouldReturnOkWhenPatchingCommentSuccessfully() throws Exception {
         when(commentService.patchById(any(CommentRequest.class), anyLong(), any(Authentication.class)))
                 .thenReturn(commentResponse);
         mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
@@ -86,7 +104,49 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void deleteCommentByIdEndpointTest() throws Exception {
+    public void shouldReturnNotFoundWhenPatchingNonexistingComment() throws Exception {
+        String errorMsg = "Comment not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(commentService.patchById(any(CommentRequest.class), anyLong(), any(Authentication.class)))
+                .thenThrow(new EntityNotFoundException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
+                        .principal(authentication)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+
+        verify(commentService, times(1))
+                .patchById(any(CommentRequest.class), anyLong(), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldReturnBadRequestWhenPatchingOtherUserComment() throws Exception {
+        String errorMsg = "Cannot update other users comment";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(commentService.patchById(any(CommentRequest.class), anyLong(), any(Authentication.class)))
+                .thenThrow(new OperationNotPermittedException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.patch("/comments/{id}", 1L)
+                        .principal(authentication)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+
+        verify(commentService, times(1))
+                .patchById(any(CommentRequest.class), anyLong(), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldReturnOkWhenDeletingCommentSuccessfully() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
                         .principal(authentication))
                 .andExpect(status().isNoContent());
@@ -95,7 +155,45 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void getAllCommentsOfRecipeEndpointTest() throws Exception {
+    public void shouldReturnNotFoundWhenDeletingNonExistingComment() throws Exception {
+        String errorMsg = "Comment not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+
+        doThrow(new EntityNotFoundException(errorMsg))
+                .when(commentService).deleteById(anyLong(), any(Authentication.class));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
+                        .principal(authentication))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+
+        verify(commentService, times(1)).deleteById(anyLong(), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldReturnBadRequestWhenDeletingOtherUserComment() throws Exception {
+        String errorMsg = "Cannot delete other users comment";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+
+        doThrow(new OperationNotPermittedException(errorMsg))
+                .when(commentService).deleteById(anyLong(), any(Authentication.class));
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/comments/{id}", 1L)
+                        .principal(authentication))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+
+        verify(commentService, times(1)).deleteById(anyLong(), any(Authentication.class));
+    }
+
+    @Test
+    public void shouldReturnOkWhenRetrievingAllCommentsForRecipeSuccessfully() throws Exception {
         when(commentService.getAllCommentsForRecipe(anyLong())).thenReturn(List.of(commentResponse));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
@@ -107,7 +205,24 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void postCommentForRecipeEndpointTest() throws Exception {
+    public void shouldReturnNotFoundWhenRetrievingAllCommentsForNonExistingRecipe() throws Exception {
+        String errorMsg = "Recipe not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(commentService.getAllCommentsForRecipe(anyLong()))
+                .thenThrow(new EntityNotFoundException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
+
+        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong());
+    }
+
+    @Test
+    public void shouldReturnCreatedWhenAddingCommentSuccessfully() throws Exception {
         when(commentService.addComment(any(CommentRequest.class), anyLong())).thenReturn(commentResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.post("/comments/recipe/{recipe-id}", 1L)
@@ -115,6 +230,25 @@ public class CommentControllerTest {
                         .content(asJsonString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", "comments/" + comment.getCommentId()));
+
+        verify(commentService, times(1)).addComment(any(CommentRequest.class), anyLong());
+    }
+
+    @Test
+    public void shouldReturnNotFoundWhenAddingCommentOnNonexistentRecipe() throws Exception {
+        String errorMsg = "Recipe not found";
+        ExceptionResponse exceptionResponse = ExceptionResponse.builder()
+                .error(errorMsg)
+                .build();
+        when(commentService.addComment(any(CommentRequest.class), anyLong()))
+                .thenThrow(new EntityNotFoundException(errorMsg));
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/comments/recipe/{recipe-id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(asJsonString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(asJsonString(exceptionResponse)));
 
         verify(commentService, times(1)).addComment(any(CommentRequest.class), anyLong());
     }
