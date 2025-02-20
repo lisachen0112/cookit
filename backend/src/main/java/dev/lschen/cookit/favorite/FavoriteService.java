@@ -1,5 +1,6 @@
 package dev.lschen.cookit.favorite;
 
+import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeService;
 import dev.lschen.cookit.user.User;
@@ -23,11 +24,11 @@ public class FavoriteService {
         Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
 
         if (Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
-            throw new RuntimeException("Cannot save user's own recipe");
+            throw new OperationNotPermittedException("Cannot save user's own recipe");
         }
 
         if (favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
-            throw new RuntimeException("Recipe already favorited");
+            throw new OperationNotPermittedException("Recipe already favorited");
         }
         Favorite favoriteRecipe = Favorite.builder()
                 .recipe(recipe)
@@ -45,7 +46,7 @@ public class FavoriteService {
         Recipe recipe = recipeService.findRecipeOrThrowError(recipeId);
 
         if (!favoritedRecipeRepository.existsByRecipeAndFavoritedBy(recipe, user)) {
-            throw new RuntimeException("Recipe has to be added to favorites before it can be removed");
+            throw new OperationNotPermittedException("Recipe has to be added to favorites before it can be removed");
         }
 
         favoritedRecipeRepository.deleteByRecipeAndFavoritedBy(recipe, user);

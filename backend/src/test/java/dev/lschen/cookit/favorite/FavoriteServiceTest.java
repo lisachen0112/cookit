@@ -1,5 +1,6 @@
 package dev.lschen.cookit.favorite;
 
+import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeService;
@@ -79,7 +80,7 @@ class FavoriteServiceTest {
         when(recipeService.findRecipeOrThrowError(anyLong())).thenReturn(recipe);
 
         assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessageContaining("Cannot save user's own recipe");
 
         verify(recipeService, times(1)).findRecipeOrThrowError(anyLong());
@@ -100,7 +101,7 @@ class FavoriteServiceTest {
         when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
 
         assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessageContaining("Recipe already favorited");
 
         verify(recipeService, times(1)).findRecipeOrThrowError(anyLong());
@@ -144,7 +145,7 @@ class FavoriteServiceTest {
         when(recipeService.findRecipeOrThrowError(anyLong())).thenReturn(recipe);
 
         assertThatThrownBy(() -> favoritedService.removeRecipeFromFavorites(1L, authentication))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessageContaining("Recipe has to be added to favorites before it can be removed");
 
         verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
