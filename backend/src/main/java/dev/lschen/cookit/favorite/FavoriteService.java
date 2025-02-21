@@ -2,6 +2,7 @@ package dev.lschen.cookit.favorite;
 
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.recipe.Recipe;
+import dev.lschen.cookit.recipe.RecipeMapper;
 import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.recipe.RecipeService;
 import dev.lschen.cookit.user.User;
@@ -19,6 +20,8 @@ public class FavoriteService {
 
     private final FavoriteRepository favoritedRecipeRepository;
     private final RecipeService recipeService;
+    private final FavoriteRepository favoriteRepository;
+    private final RecipeMapper recipeMapper;
 
     public Favorite addRecipeToFavorites(Long recipeId, Authentication connectedUser) {
         User user = (User) connectedUser.getPrincipal();
@@ -56,6 +59,10 @@ public class FavoriteService {
 
     // TODO
     public List<RecipeResponse> findFavoritesByUser(String username) {
-        return null;
+        List<Favorite> favorites = favoriteRepository.findByFavoritedBy_Username(username);
+
+        return favorites.stream()
+                .map(fav-> recipeMapper.toRecipeResponse(fav.getRecipe()))
+                .toList();
     }
 }

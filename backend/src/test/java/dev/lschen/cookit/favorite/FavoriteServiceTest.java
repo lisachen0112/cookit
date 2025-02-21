@@ -3,6 +3,8 @@ package dev.lschen.cookit.favorite;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.recipe.Recipe;
+import dev.lschen.cookit.recipe.RecipeMapper;
+import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.recipe.RecipeService;
 import dev.lschen.cookit.user.User;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,11 +36,16 @@ class FavoriteServiceTest {
     private RecipeService recipeService;
 
     @Mock
-    private FavoriteRepository favoritedRepository;
+    private RecipeMapper recipeMapper;
 
-    Authentication authentication;
+    @Mock
+    private FavoriteRepository favoriteRepository;
+
+    Authentication authentication = mock(UsernamePasswordAuthenticationToken.class);
     Recipe recipe;
     User mockUser;
+    Favorite favorite;
+    RecipeResponse recipeResponse;
 
     @BeforeEach
     void setUp() {
@@ -49,8 +56,6 @@ class FavoriteServiceTest {
                 .email("test@example.com")
                 .password("encodedPassword")
                 .build();
-        authentication = mock(UsernamePasswordAuthenticationToken.class);
-        when(authentication.getPrincipal()).thenReturn(mockUser);
 
         recipe = Recipe.builder()
                 .recipeId(1L)
@@ -72,11 +77,30 @@ class FavoriteServiceTest {
                 .measurement("measurement")
                 .recipe(recipe)
                 .build());
+
+        favorite = Favorite.builder()
+                .favoritedBy(mockUser)
+                .recipe(recipe)
+                .build();
+
+        recipeResponse = new RecipeResponse(
+                1L,
+                "title",
+                "description",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     @Test
     public void ThrowExceptionWhenFavouringOwnRecipe() {
         recipe.setCreatedBy(mockUser);
+        when(authentication.getPrincipal()).thenReturn(mockUser);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
 
         assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
@@ -97,8 +121,9 @@ class FavoriteServiceTest {
                 .password("encodedPassword")
                 .build();
         recipe.setCreatedBy(newUser);
+        when(authentication.getPrincipal()).thenReturn(mockUser);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
-        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
+        when(favoriteRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
 
         assertThatThrownBy(() -> favoritedService.addRecipeToFavorites(1L, authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
@@ -106,8 +131,8 @@ class FavoriteServiceTest {
 
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
         verifyNoMoreInteractions(recipeService);
-        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
-        verifyNoMoreInteractions(favoritedRepository);
+        verify(favoriteRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verifyNoMoreInteractions(favoriteRepository);
     }
 
     @Test
@@ -126,43 +151,58 @@ class FavoriteServiceTest {
                 .favoritedBy(mockUser)
                 .build();
 
+        when(authentication.getPrincipal()).thenReturn(mockUser);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
-        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
+        when(favoriteRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
 
         Favorite result = favoritedService.addRecipeToFavorites(1L, authentication);
 
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
         verifyNoMoreInteractions(recipeService);
-        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
-        verify(favoritedRepository, times(1)).save(any(Favorite.class));
+        verify(favoriteRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(favoriteRepository, times(1)).save(any(Favorite.class));
         assertThat(result.getFavoritedBy()).isEqualTo(expected.getFavoritedBy());
         assertThat(result.getRecipe()).isEqualTo(expected.getRecipe());
     }
 
     @Test
     public void ThrowExceptionWhenRemovingRecipeFromFavoritesIfItHasNotBeenFavoritedBeforehand() {
-        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
+        when(authentication.getPrincipal()).thenReturn(mockUser);
+        when(favoriteRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(false);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
 
         assertThatThrownBy(() -> favoritedService.removeRecipeFromFavorites(1L, authentication))
                 .isInstanceOf(OperationNotPermittedException.class)
                 .hasMessageContaining("Recipe has to be added to favorites before it can be removed");
 
-        verify(favoritedRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
+        verify(favoriteRepository, times(1)).existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
     }
 
     @Test
     public void SuccessfullyRemovedRecipeFromFavorites() {
-        when(favoritedRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
+        when(authentication.getPrincipal()).thenReturn(mockUser);
+        when(favoriteRepository.existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class))).thenReturn(true);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
 
         favoritedService.removeRecipeFromFavorites(1L, authentication);
 
-        verify(favoritedRepository, times(1)).
+        verify(favoriteRepository, times(1)).
                 existsByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
-        verify(favoritedRepository, times(1))
+        verify(favoriteRepository, times(1))
                 .deleteByRecipeAndFavoritedBy(any(Recipe.class), any(User.class));
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
+    }
+
+    @Test
+    public void SuccessfullyGetFavoritesByUser() {
+        when(favoriteRepository.findByFavoritedBy_Username(anyString()))
+                .thenReturn(List.of(favorite));
+        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(recipeResponse);
+
+        List<RecipeResponse> responseList = favoritedService.findFavoritesByUser("test");
+
+        assertThat(responseList).isEqualTo(List.of(recipeResponse));
+        verify(favoriteRepository, times(1)).findByFavoritedBy_Username(anyString());
     }
 }
