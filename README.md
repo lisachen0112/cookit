@@ -8,7 +8,7 @@ Q&A section**, and **real-time notifications**.
 - Recipe Management – full CRUD operations for recipes, multimedia support (images, videos)
 - Social Fesures - user following system, recipe favoriting, comment threading 
 
-📖 For a detailed breakdown of features, visit the wiki.
+📖 For a detailed breakdown of features, visit the [wiki](https://github.com/lisachen0112/cookit/wiki/Main-features).
 
 ### 🛠 Tech Stack: 
 #### Backend
