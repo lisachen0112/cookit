@@ -1,7 +1,6 @@
 package dev.lschen.cookit.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.lschen.cookit.comment.Comment;
 import dev.lschen.cookit.favorite.Favorite;
 import dev.lschen.cookit.recipe.Recipe;
@@ -49,7 +48,7 @@ public class User implements UserDetails {
     private LocalDateTime createdDate;
 
     @OneToMany(mappedBy = "createdBy", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference("recipe")
+    @JsonIgnore
     private List<Recipe> uploadedRecipes;
 
     @OneToMany(mappedBy = "favoritedBy", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -98,4 +98,12 @@ public class RecipeService {
         recipe.getIngredients().addAll(ingredients);
         recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
     }
+
+    public List<RecipeResponse> findRecipesByUser(String username) {
+        List<Recipe> recipes = recipeRepository.findByCreatedBy_Username(username);
+
+        return recipes.stream()
+                .map(recipeMapper::toRecipeResponse)
+                .toList();
+    }
 }

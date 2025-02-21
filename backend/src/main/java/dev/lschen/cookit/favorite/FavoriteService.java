@@ -2,6 +2,7 @@ package dev.lschen.cookit.favorite;
 
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.recipe.Recipe;
+import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.recipe.RecipeService;
 import dev.lschen.cookit.user.User;
 import jakarta.transaction.Transactional;
@@ -9,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -50,5 +52,10 @@ public class FavoriteService {
         }
 
         favoritedRecipeRepository.deleteByRecipeAndFavoritedBy(recipe, user);
+    }
+
+    // TODO
+    public List<RecipeResponse> findFavoritesByUser(String username) {
+        return null;
     }
 }

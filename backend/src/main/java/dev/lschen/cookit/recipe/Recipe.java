@@ -1,6 +1,5 @@
 package dev.lschen.cookit.recipe;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import dev.lschen.cookit.comment.Comment;
@@ -59,7 +58,6 @@ public class Recipe {
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false, updatable = false)
-    @JsonBackReference("recipe")
     @CreatedBy
     private User createdBy;
 
