@@ -1,11 +1,16 @@
 package dev.lschen.cookit.comment;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeService;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -60,11 +65,22 @@ public class CommentService {
         commentRepository.deleteById(commentId);
     }
 
-    public List<CommentResponse> getAllCommentsForRecipe(Long recipeId) {
-        Recipe recipe = recipeService.findRecipeOrThrowException(recipeId);
-        List<Comment> comments = recipe.getComments();
-        return comments.stream()
+    public PageResponse<CommentResponse> getAllCommentsForRecipe(Long recipeId, int page, int size) {
+         recipeService.findRecipeOrThrowException(recipeId);
+         Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
+         Page<Comment> comments = commentRepository.findByRecipe(pageable, recipeId);
+         List<CommentResponse> response = comments.stream()
                 .map(commentMapper::toCommentResponse)
                 .toList();
+
+         return new PageResponse<>(
+                 response,
+                 comments.getNumber(),
+                 comments.getSize(),
+                 comments.getTotalElements(),
+                 comments.getTotalPages(),
+                 comments.isFirst(),
+                 comments.isLast()
+         );
     }
 }

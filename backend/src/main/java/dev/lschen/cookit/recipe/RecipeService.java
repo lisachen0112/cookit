@@ -1,5 +1,6 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
@@ -8,6 +9,10 @@ import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
@@ -36,11 +41,22 @@ public class RecipeService {
         return recipeMapper.toRecipeResponse(recipe);
     }
 
-    public List<RecipeResponse> findAll() {
-        List<Recipe> recipes = recipeRepository.findAll();
-        return recipes.stream()
+    public PageResponse<RecipeResponse> findAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
+        Page<Recipe> recipes = recipeRepository.findAll(pageable);
+        List<RecipeResponse> response = recipes.stream()
                 .map(recipeMapper::toRecipeResponse)
                 .toList();
+
+        return new PageResponse<>(
+                response,
+                recipes.getNumber(),
+                recipes.getSize(),
+                recipes.getTotalElements(),
+                recipes.getTotalPages(),
+                recipes.isFirst(),
+                recipes.isLast()
+        );
     }
 
     public RecipeResponse findById(Long id) {
@@ -99,11 +115,22 @@ public class RecipeService {
         recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
     }
 
-    public List<RecipeResponse> findRecipesByUser(String username) {
-        List<Recipe> recipes = recipeRepository.findByCreatedBy_Username(username);
+    public PageResponse<RecipeResponse> findRecipesByUser(int page, int size, String username) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
+        Page<Recipe> recipes = recipeRepository.findByCreatedBy_Username(pageable, username);
 
-        return recipes.stream()
+        List<RecipeResponse> response = recipes.stream()
                 .map(recipeMapper::toRecipeResponse)
                 .toList();
+
+        return new PageResponse<>(
+                response,
+                recipes.getNumber(),
+                recipes.getSize(),
+                recipes.getTotalElements(),
+                recipes.getTotalPages(),
+                recipes.isFirst(),
+                recipes.isLast()
+        );
     }
 }

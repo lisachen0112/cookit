@@ -1,6 +1,7 @@
 package dev.lschen.cookit.user;
 
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.handler.ExceptionResponse;
 import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.security.JwtService;
@@ -43,10 +44,32 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     private UserResponse userResponse;
+    private PageResponse<RecipeResponse> pageResponse;
 
     @BeforeEach
     void setUp() {
         userResponse = new UserPublicResponse("test");
+        RecipeResponse recipeResponse = new RecipeResponse(
+                1L,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null);
+        List<RecipeResponse> recipes = List.of(recipeResponse);
+        pageResponse = new PageResponse<>(
+                recipes,
+                0,
+                10,
+                1,
+                1,
+                true,
+                true);
+
     }
 
     @Test
@@ -84,51 +107,27 @@ public class UserControllerTest {
     }
 
     @Test
-    public void shouldReturnOkWhenRetrievingUserOwnRecipeSuccessfully() throws Exception {
-        RecipeResponse recipeResponse = new RecipeResponse(
-                1L,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        List<RecipeResponse> response = List.of(recipeResponse);
-        when(userService.findRecipesByUser(anyString())).thenReturn(response);
+    public void shouldReturnOkWhenRetrievingUserRecipeSuccessfully() throws Exception {
+        when(userService.findRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(pageResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/recipes", "test"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(response)));
+                .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(userService, times(1)).findRecipesByUser(anyString());
+        verify(userService, times(1)).findRecipesByUser(anyInt(), anyInt(), anyString());
     }
 
     @Test
     public void shouldReturnOkWhenRetrievingUserFavoritedRecipesSuccessfully() throws Exception {
-        RecipeResponse recipeResponse = new RecipeResponse(
-                1L,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
-        List<RecipeResponse> response = List.of(recipeResponse);
-        when(userService.findFavoritedRecipesByUser(anyString())).thenReturn(response);
+        when(userService.findFavoritedRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(pageResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/favorites", "test"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(response)));
+                .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(userService, times(1)).findFavoritedRecipesByUser(anyString());
+        verify(userService, times(1)).findFavoritedRecipesByUser(anyInt(), anyInt(), anyString());
     }
 
 }

@@ -1,16 +1,18 @@
 package dev.lschen.cookit.comment;
 
+import dev.lschen.cookit.common.PageResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("comments")
 @RequiredArgsConstructor
+@Tag(name="Comment")
 public class CommentController {
 
     private final CommentService commentService;
@@ -39,9 +41,11 @@ public class CommentController {
     }
 
     @GetMapping("/recipe/{recipe-id}")
-    ResponseEntity<List<CommentResponse>> getCommentsForRecipe(@PathVariable("recipe-id") Long recipeId) {
-        List<CommentResponse> comments = commentService.getAllCommentsForRecipe(recipeId);
-        return ResponseEntity.ok(comments);
+    ResponseEntity<PageResponse<CommentResponse>> getCommentsForRecipe(
+            @PathVariable("recipe-id") Long recipeId,
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size) {
+        return ResponseEntity.ok(commentService.getAllCommentsForRecipe(recipeId, page, size));
     }
 
     @PostMapping("/recipe/{recipe-id}")

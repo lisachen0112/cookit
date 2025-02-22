@@ -1,5 +1,6 @@
 package dev.lschen.cookit.recipe;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.handler.ExceptionResponse;
 import dev.lschen.cookit.security.JwtFilter;
 import jakarta.persistence.EntityNotFoundException;
@@ -78,14 +79,26 @@ class RecipeControllerTest {
 
     @Test
     public void getAllRecipesEndpointTest() throws Exception {
-        when(recipeService.findAll()).thenReturn(List.of(response));
+        List<RecipeResponse> recipes = List.of(response);
+        PageResponse<RecipeResponse> pageResponse = new PageResponse<>(
+                recipes,
+                0,
+                10,
+                1,
+                1,
+                true,
+                true);
+        when(recipeService.findAll(anyInt(), anyInt())).thenReturn(pageResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/recipes"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/recipes")
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(List.of(response))));
+                .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(recipeService, times(1)).findAll();
+        verify(recipeService, times(1)).findAll(0, 10);
     }
 
     @Test

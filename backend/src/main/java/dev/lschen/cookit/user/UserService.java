@@ -1,5 +1,6 @@
 package dev.lschen.cookit.user;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.favorite.FavoriteService;
 import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.recipe.RecipeService;
@@ -7,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -33,14 +32,14 @@ public class UserService {
         return userMapper.toUserPublicResponse(queriedUser);
     }
 
-    public List<RecipeResponse> findRecipesByUser(String username) {
+    public PageResponse<RecipeResponse> findRecipesByUser(int page, int size, String username) {
         getUserOrThrowException(username);
-        return recipeService.findRecipesByUser(username);
+        return recipeService.findRecipesByUser(page, size, username);
     }
 
-    public List<RecipeResponse> findFavoritedRecipesByUser(String username) {
+    public PageResponse<RecipeResponse> findFavoritedRecipesByUser(int page, int size, String username) {
         getUserOrThrowException(username);
-        return favoriteService.findFavoritesByUser(username);
+        return favoriteService.findFavoritesByUser(page, size, username);
     }
 
 }

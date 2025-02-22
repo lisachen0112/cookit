@@ -1,9 +1,11 @@
 package dev.lschen.cookit.recipe;
 
+import lombok.NonNull;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
-    List<Recipe> findByCreatedBy_Username(String username);
+    Page<Recipe> findAll(@NonNull Pageable pageable);
+    Page<Recipe> findByCreatedBy_Username(Pageable pageable, String username);
 }

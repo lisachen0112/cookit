@@ -1,5 +1,6 @@
 package dev.lschen.cookit.favorite;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.recipe.Recipe;
@@ -13,6 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
@@ -196,13 +201,20 @@ class FavoriteServiceTest {
 
     @Test
     public void SuccessfullyGetFavoritesByUser() {
-        when(favoriteRepository.findByFavoritedBy_Username(anyString()))
-                .thenReturn(List.of(favorite));
+        Page<Favorite> recipePage = new PageImpl<>(List.of(favorite), PageRequest.of(0, 10), 1);
+        when(favoriteRepository.findByFavoritedBy_Username(any(Pageable.class), anyString()))
+                .thenReturn(recipePage);
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(recipeResponse);
 
-        List<RecipeResponse> responseList = favoritedService.findFavoritesByUser("test");
+        PageResponse<RecipeResponse> results = favoritedService.findFavoritesByUser(0, 10,"test");
 
-        assertThat(responseList).isEqualTo(List.of(recipeResponse));
-        verify(favoriteRepository, times(1)).findByFavoritedBy_Username(anyString());
+        assertThat(results.getContent()).isEqualTo(List.of(recipeResponse));
+        assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getTotalPages()).isEqualTo(1);
+        assertThat(results.getNumber()).isEqualTo(0);
+        assertThat(results.getSize()).isEqualTo(10);
+
+        verify(favoriteRepository, times(1))
+                .findByFavoritedBy_Username(any(Pageable.class), anyString());
     }
 }

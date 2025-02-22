@@ -1,5 +1,6 @@
 package dev.lschen.cookit.user;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.favorite.FavoriteService;
 import dev.lschen.cookit.recipe.RecipeResponse;
 import dev.lschen.cookit.recipe.RecipeService;
@@ -80,8 +81,6 @@ class UserServiceTest {
                 null,
                 null
         ));
-
-
     }
 
     @Test
@@ -126,7 +125,7 @@ class UserServiceTest {
     @Test
     public void throwExceptionWhenQueringRecipeOfNonExistentUser() {
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.findRecipesByUser("nonexistentUser"))
+        assertThatThrownBy(() -> userService.findRecipesByUser(0, 10, "nonexistentUser"))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("User not found");
         verify(userRepository, times(1)).findByUsername(anyString());
@@ -134,20 +133,31 @@ class UserServiceTest {
 
     @Test
     public void successfullyGetRecipesByUser() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
-        when(recipeService.findRecipesByUser(anyString())).thenReturn(recipeResponseList);
+        PageResponse<RecipeResponse> response = new PageResponse<>(
+                recipeResponseList,
+                1,
+                1,
+                0,
+                10,
+                true,
+                true
+        );
 
-        List<RecipeResponse> response = userService.findRecipesByUser("queriedUser");
-        assertThat(response).isEqualTo(recipeResponseList);
+        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
+        when(recipeService.findRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(response);
+
+        PageResponse<RecipeResponse> results = userService.findRecipesByUser(0, 10,"queriedUser");
+
+        assertThat(results).isEqualTo(response);
 
         verify(userRepository, times(1)).findByUsername(anyString());
-        verify(recipeService, times(1)).findRecipesByUser(anyString());
+        verify(recipeService, times(1)).findRecipesByUser(anyInt(), anyInt(), anyString());
     }
 
     @Test
     public void throwExceptionWhenGettingFavoritedRecipesOfNonExistentUser() {
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.findFavoritedRecipesByUser("nonexistentUser"))
+        assertThatThrownBy(() -> userService.findFavoritedRecipesByUser(0, 10,"nonexistentUser"))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("User not found");
         verify(userRepository, times(1)).findByUsername(anyString());
@@ -155,13 +165,23 @@ class UserServiceTest {
 
     @Test
     public void successfullyGetFavoritedRecipesByUser() {
+        PageResponse<RecipeResponse> response = new PageResponse<>(
+                recipeResponseList,
+                1,
+                1,
+                0,
+                10,
+                true,
+                true
+        );
+
         when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
-        when(favoriteService.findFavoritesByUser(anyString())).thenReturn(recipeResponseList);
+        when(favoriteService.findFavoritesByUser(anyInt(), anyInt(), anyString())).thenReturn(response);
 
-        List<RecipeResponse> response = userService.findFavoritedRecipesByUser("queriedUser");
-        assertThat(response).isEqualTo(recipeResponseList);
+        PageResponse<RecipeResponse> results = userService.findFavoritedRecipesByUser(0, 10,"queriedUser");
 
+        assertThat(results).isEqualTo(response);
         verify(userRepository, times(1)).findByUsername(anyString());
-        verify(favoriteService, times(1)).findFavoritesByUser(anyString());
+        verify(favoriteService, times(1)).findFavoritesByUser(anyInt(), anyInt(), anyString());
     }
 }

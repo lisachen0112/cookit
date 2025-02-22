@@ -1,5 +1,6 @@
 package dev.lschen.cookit.comment;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.handler.ExceptionResponse;
 import dev.lschen.cookit.security.JwtFilter;
@@ -62,7 +63,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void shouldReturnOkWhenRetrievingCommentSuccessfully() throws Exception {
+    public void shouldReturnOkWhenRetrievingCommentByIdSuccessfully() throws Exception {
         when(commentService.findById(anyLong())).thenReturn(commentResponse);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/{id}", 1L))
@@ -104,7 +105,7 @@ public class CommentControllerTest {
     }
 
     @Test
-    public void shouldReturnNotFoundWhenPatchingNonexistingComment() throws Exception {
+    public void shouldReturnNotFoundWhenPatchingNonexistentComment() throws Exception {
         String errorMsg = "Comment not found";
         ExceptionResponse exceptionResponse = ExceptionResponse.builder()
                 .error(errorMsg)
@@ -194,14 +195,26 @@ public class CommentControllerTest {
 
     @Test
     public void shouldReturnOkWhenRetrievingAllCommentsForRecipeSuccessfully() throws Exception {
-        when(commentService.getAllCommentsForRecipe(anyLong())).thenReturn(List.of(commentResponse));
+        List<CommentResponse> comments = List.of(commentResponse);
+        PageResponse<CommentResponse> pageResponse = new PageResponse<>(
+                comments,
+                0,
+                10,
+                1,
+                1,
+                true,
+                true);
+        when(commentService.getAllCommentsForRecipe(anyLong(), anyInt(), anyInt())).thenReturn(pageResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L)
+                        .param("page", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(content().json(asJsonString(List.of(commentResponse))));
+                .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong());
+        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong(), anyInt(), anyInt());
     }
 
     @Test
@@ -210,7 +223,7 @@ public class CommentControllerTest {
         ExceptionResponse exceptionResponse = ExceptionResponse.builder()
                 .error(errorMsg)
                 .build();
-        when(commentService.getAllCommentsForRecipe(anyLong()))
+        when(commentService.getAllCommentsForRecipe(anyLong(), anyInt(), anyInt()))
                 .thenThrow(new EntityNotFoundException(errorMsg));
 
         mockMvc.perform(MockMvcRequestBuilders.get("/comments/recipe/{recipe-id}", 1L))
@@ -218,7 +231,7 @@ public class CommentControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(exceptionResponse)));
 
-        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong());
+        verify(commentService, times(1)).getAllCommentsForRecipe(anyLong(), anyInt(), anyInt());
     }
 
     @Test

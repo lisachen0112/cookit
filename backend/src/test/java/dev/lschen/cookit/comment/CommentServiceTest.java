@@ -1,5 +1,6 @@
 package dev.lschen.cookit.comment;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.recipe.Recipe;
 import dev.lschen.cookit.recipe.RecipeService;
@@ -11,6 +12,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
@@ -223,7 +228,7 @@ class CommentServiceTest {
         when(recipeService.findRecipeOrThrowException(anyLong()))
                 .thenThrow(new EntityNotFoundException("Recipe not found"));
 
-        assertThatThrownBy(() -> commentService.getAllCommentsForRecipe(1L))
+        assertThatThrownBy(() -> commentService.getAllCommentsForRecipe(1L, 0, 10))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Recipe not found");
 
@@ -232,14 +237,22 @@ class CommentServiceTest {
 
     @Test
     public void successfulGetAllCommentsForRecipe() {
-        recipe.setComments(List.of(comment));
+        Page<Comment> commentPage = new PageImpl<>(List.of(comment), PageRequest.of(0, 10), 1);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
+        when(commentRepository.findByRecipe(any(Pageable.class), anyLong())).thenReturn(commentPage);
         when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
 
-        List<CommentResponse> response = commentService.getAllCommentsForRecipe(1L);
-        assertThat(response).isEqualTo(List.of(commentResponse));
+        PageResponse<CommentResponse> results = commentService.getAllCommentsForRecipe(1L, 0, 10);
+
+        assertThat(results.getContent()).isEqualTo(List.of(commentResponse));
+        assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getTotalPages()).isEqualTo(1);
+        assertThat(results.getNumber()).isEqualTo(0);
+        assertThat(results.getSize()).isEqualTo(10);
+
 
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
         verifyNoMoreInteractions(recipeService);
+        verify(commentRepository, times(1)).findByRecipe(any(Pageable.class), anyLong());
     }
 }

@@ -1,5 +1,6 @@
 package dev.lschen.cookit.recipe.service;
 
+import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.ingredient.Ingredient;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.recipe.*;
@@ -10,6 +11,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
@@ -74,13 +79,19 @@ public class RecipeServiceRetrievalTest {
 
     @Test
     public void getAllRecipesFromRepository() {
-        when(recipeRepository.findAll()).thenReturn(List.of(recipe));
+        Page<Recipe> recipePage = new PageImpl<>(List.of(recipe), PageRequest.of(0, 10), 1);
+        when(recipeRepository.findAll(any(Pageable.class))).thenReturn(recipePage);
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        List<RecipeResponse> results = recipeService.findAll();
+        PageResponse<RecipeResponse> results = recipeService.findAll(0, 10);
 
-        verify(recipeRepository, times(1)).findAll();
-        assertThat(results).isEqualTo(List.of(response));
+        verify(recipeRepository, times(1)).findAll(any(Pageable.class));
+
+        assertThat(results.getContent()).isEqualTo(List.of(response));
+        assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getTotalPages()).isEqualTo(1);
+        assertThat(results.getNumber()).isEqualTo(0);
+        assertThat(results.getSize()).isEqualTo(10);
     }
 
     @Test
@@ -107,13 +118,20 @@ public class RecipeServiceRetrievalTest {
 
     @Test
     public void getRecipeByUserSuccessfullyTest() {
-        when(recipeRepository.findByCreatedBy_Username(anyString()))
-                .thenReturn(List.of(recipe));
+        Page<Recipe> recipePage = new PageImpl<>(List.of(recipe), PageRequest.of(0, 10), 1);
+        when(recipeRepository.findByCreatedBy_Username(any(Pageable.class), anyString()))
+                .thenReturn(recipePage);
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        List<RecipeResponse> responseList = recipeService.findRecipesByUser("test");
+        PageResponse<RecipeResponse> results = recipeService.findRecipesByUser(0, 10,"test");
 
-        assertThat(responseList).isEqualTo(List.of(response));
-        verify(recipeRepository, times(1)).findByCreatedBy_Username("test");
+        assertThat(results.getContent()).isEqualTo(List.of(response));
+        assertThat(results.getTotalElements()).isEqualTo(1);
+        assertThat(results.getTotalPages()).isEqualTo(1);
+        assertThat(results.getNumber()).isEqualTo(0);
+        assertThat(results.getSize()).isEqualTo(10);
+
+        verify(recipeRepository, times(1))
+                .findByCreatedBy_Username(any(Pageable.class), anyString());
     }
 }
