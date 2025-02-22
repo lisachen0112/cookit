@@ -47,6 +47,7 @@ class ActivationTokenServiceTest {
         token = "test-token";
 
         user = User.builder()
+                .userId(1L)
                 .firstName("John")
                 .lastName("Doe")
                 .email("john.doe@example.com")
@@ -100,26 +101,26 @@ class ActivationTokenServiceTest {
     void throwsErrorIfUserAssociatedWithTokenDoesNotExist() {
         activationToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
         when(activationTokenRepository.findByToken(anyString())).thenReturn(Optional.of(activationToken));
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> activationTokenService.verifyToken(activationToken.getToken()))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessage("User associated with token does not exist");
 
         verify(activationTokenRepository, times(1)).findByToken(anyString());
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
     void activationTokenIsCorrectlyVerified() throws MessagingException {
         activationToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
         when(activationTokenRepository.findByToken(anyString())).thenReturn(Optional.of(activationToken));
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(user));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(user));
 
         activationTokenService.verifyToken(token);
 
         verify(activationTokenRepository, times(1)).findByToken(anyString());
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(userRepository, times(1)).save(any(User.class));
         verify(activationTokenRepository, times(1)).save(any(ActivationToken.class));
     }

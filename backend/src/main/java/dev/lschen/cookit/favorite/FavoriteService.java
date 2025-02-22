@@ -33,7 +33,7 @@ public class FavoriteService {
 
         Recipe recipe = recipeService.findRecipeOrThrowException(recipeId);
 
-        if (Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
+        if (Objects.equals(user.getUserId(), recipe.getCreatedBy().getUserId())) {
             throw new OperationNotPermittedException("Cannot save user's own recipe");
         }
 
@@ -62,9 +62,9 @@ public class FavoriteService {
         favoritedRecipeRepository.deleteByRecipeAndFavoritedBy(recipe, user);
     }
 
-    public PageResponse<RecipeResponse> findFavoritesByUser(int page, int size, String username) {
+    public PageResponse<RecipeResponse> findFavoritesByUserId(int page, int size, Long userId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("favoritedAt").descending());
-        Page<Favorite> favorites = favoriteRepository.findByFavoritedBy_Username(pageable, username);
+        Page<Favorite> favorites = favoriteRepository.findByFavoritedBy_UserId(pageable, userId);
 
         List<RecipeResponse> response = favorites.stream()
                 .map(fav-> recipeMapper.toRecipeResponse(fav.getRecipe()))

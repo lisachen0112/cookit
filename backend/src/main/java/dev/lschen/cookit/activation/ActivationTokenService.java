@@ -59,7 +59,7 @@ public class ActivationTokenService {
             throw new RuntimeException("Token has expired. A new token has been sent");
         }
 
-        var user = userRepository.findByUsername(savedToken.getUser().getUsername())
+        var user = userRepository.findById(savedToken.getUser().getUserId())
                 .orElseThrow(() -> new UsernameNotFoundException("User associated with token does not exist"));
         user.setEnabled(true);
         userRepository.save(user);

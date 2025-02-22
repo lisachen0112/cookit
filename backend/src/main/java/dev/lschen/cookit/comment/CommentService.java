@@ -47,7 +47,7 @@ public class CommentService {
         Comment comment = findCommentOrThrowException(commentId);
 
         User user = (User) authentication.getPrincipal();
-        if (!Objects.equals(user.getUsername(), comment.getCommentedBy().getUsername())) {
+        if (!Objects.equals(user.getUserId(), comment.getCommentedBy().getUserId())) {
             throw new OperationNotPermittedException("Cannot update other users comment");
         }
         comment.setContent(request.content());
@@ -59,7 +59,7 @@ public class CommentService {
         Comment comment = findCommentOrThrowException(commentId);
 
         User user = (User) authentication.getPrincipal();
-        if (!Objects.equals(user.getUsername(), comment.getCommentedBy().getUsername())) {
+        if (!Objects.equals(user.getUserId(), comment.getCommentedBy().getUserId())) {
             throw new OperationNotPermittedException("Cannot delete other users comment");
         }
         commentRepository.deleteById(commentId);
@@ -68,7 +68,7 @@ public class CommentService {
     public PageResponse<CommentResponse> getAllCommentsForRecipe(Long recipeId, int page, int size) {
          recipeService.findRecipeOrThrowException(recipeId);
          Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
-         Page<Comment> comments = commentRepository.findByRecipe(pageable, recipeId);
+         Page<Comment> comments = commentRepository.findByRecipe_RecipeId(pageable, recipeId);
          List<CommentResponse> response = comments.stream()
                 .map(commentMapper::toCommentResponse)
                 .toList();

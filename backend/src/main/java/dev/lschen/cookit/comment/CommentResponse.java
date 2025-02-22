@@ -6,7 +6,7 @@ public record CommentResponse (
         Long commentId,
         String content,
         LocalDateTime lastModifiedDate,
-        String userId,
+        Long userId,
         Long recipeId
 ) {
 }

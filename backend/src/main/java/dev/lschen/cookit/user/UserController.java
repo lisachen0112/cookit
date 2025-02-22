@@ -18,27 +18,27 @@ public class UserController {
 
     @GetMapping("/{username}")
     public ResponseEntity<UserResponse> getUserInfo(
-            @PathVariable("username") String username,
+            @PathVariable("username") Long userId,
             Authentication authentication) {
-        return ResponseEntity.ok(userService.findUserByUsername(username, authentication));
+        return ResponseEntity.ok(userService.findUserByUserId(userId, authentication));
     }
 
     @GetMapping("/{username}/recipes")
     public ResponseEntity<PageResponse<RecipeResponse>> getRecipes(
-            @PathVariable("username") String username,
+            @PathVariable("username") Long userId,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) {
-        return ResponseEntity.ok(userService.findRecipesByUser(page, size, username));
+        return ResponseEntity.ok(userService.findRecipesByUserId(page, size, userId));
     }
 
     @GetMapping("/{username}/favorites")
     public ResponseEntity<PageResponse<RecipeResponse>> getFavoritedRecipes(
-            @PathVariable("username") String username,
+            @PathVariable("username") Long userId,
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) {
-        return ResponseEntity.ok(userService.findFavoritedRecipesByUser(page, size, username));
+        return ResponseEntity.ok(userService.findFavoritedRecipesByUserId(page, size, userId));
     }
 
 }

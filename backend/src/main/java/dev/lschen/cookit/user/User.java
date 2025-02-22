@@ -25,6 +25,9 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class) // track the creation and modification information
 public class User implements UserDetails {
     @Id
+    @GeneratedValue
+    private Long userId;
+
     @Column(unique = true, nullable = false)
     private String username;
 

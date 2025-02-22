@@ -52,8 +52,8 @@ public class RecipeServiceEditTest {
 
     @BeforeEach
     void setUp() {
-        principal = User.builder().username("principal").build();
-        User otherUser = User.builder().username("otherUser").build();
+        principal = User.builder().userId(1L).username("principal").build();
+        User otherUser = User.builder().userId(2L).username("otherUser").build();
 
         recipeOwn = Recipe.builder()
                 .recipeId(1L)

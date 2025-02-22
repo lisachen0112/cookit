@@ -21,7 +21,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import java.util.List;
 
 import static dev.lschen.cookit.utils.TestUtils.asJsonString;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,7 +47,7 @@ public class UserControllerTest {
 
     @BeforeEach
     void setUp() {
-        userResponse = new UserPublicResponse("test");
+        userResponse = new UserPublicResponse(1L, "test1");
         RecipeResponse recipeResponse = new RecipeResponse(
                 1L,
                 null,
@@ -74,17 +73,17 @@ public class UserControllerTest {
 
     @Test
     public void shouldReturnOkWhenRetrievingUserDetailsSuccessfully() throws Exception {
-        when(userService.findUserByUsername(anyString(), any(Authentication.class)))
+        when(userService.findUserByUserId(anyLong(), any(Authentication.class)))
                 .thenReturn(userResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}", "test")
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}", 1L)
                         .principal(authentication)
                 )
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(userResponse)));
 
-        verify(userService, times(1)).findUserByUsername(anyString(), any(Authentication.class));
+        verify(userService, times(1)).findUserByUserId(anyLong(), any(Authentication.class));
     }
 
     @Test
@@ -94,40 +93,40 @@ public class UserControllerTest {
                 .error(errorMsg)
                 .build();
 
-        when(userService.findUserByUsername(anyString(), any(Authentication.class)))
+        when(userService.findUserByUserId(anyLong(), any(Authentication.class)))
                 .thenThrow(new EntityNotFoundException(errorMsg));
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}", "test")
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}", 1L)
                         .principal(authentication))
                 .andExpect(status().isNotFound())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(exceptionResponse)));
 
-        verify(userService, times(1)).findUserByUsername(anyString(), any(Authentication.class));
+        verify(userService, times(1)).findUserByUserId(anyLong(), any(Authentication.class));
     }
 
     @Test
     public void shouldReturnOkWhenRetrievingUserRecipeSuccessfully() throws Exception {
-        when(userService.findRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(pageResponse);
+        when(userService.findRecipesByUserId(anyInt(), anyInt(), anyLong())).thenReturn(pageResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/recipes", "test"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/recipes", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(userService, times(1)).findRecipesByUser(anyInt(), anyInt(), anyString());
+        verify(userService, times(1)).findRecipesByUserId(anyInt(), anyInt(), anyLong());
     }
 
     @Test
     public void shouldReturnOkWhenRetrievingUserFavoritedRecipesSuccessfully() throws Exception {
-        when(userService.findFavoritedRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(pageResponse);
+        when(userService.findFavoritedRecipesByUserId(anyInt(), anyInt(), anyLong())).thenReturn(pageResponse);
 
-        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/favorites", "test"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/{id}/favorites", 1L))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(asJsonString(pageResponse)));
 
-        verify(userService, times(1)).findFavoritedRecipesByUser(anyInt(), anyInt(), anyString());
+        verify(userService, times(1)).findFavoritedRecipesByUserId(anyInt(), anyInt(), anyLong());
     }
 
 }

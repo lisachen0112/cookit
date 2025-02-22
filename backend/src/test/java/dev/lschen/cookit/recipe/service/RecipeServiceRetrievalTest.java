@@ -119,11 +119,11 @@ public class RecipeServiceRetrievalTest {
     @Test
     public void getRecipeByUserSuccessfullyTest() {
         Page<Recipe> recipePage = new PageImpl<>(List.of(recipe), PageRequest.of(0, 10), 1);
-        when(recipeRepository.findByCreatedBy_Username(any(Pageable.class), anyString()))
+        when(recipeRepository.findByCreatedBy_UserId(any(Pageable.class), anyLong()))
                 .thenReturn(recipePage);
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
 
-        PageResponse<RecipeResponse> results = recipeService.findRecipesByUser(0, 10,"test");
+        PageResponse<RecipeResponse> results = recipeService.findRecipesByUserId(0, 10,1L);
 
         assertThat(results.getContent()).isEqualTo(List.of(response));
         assertThat(results.getTotalElements()).isEqualTo(1);
@@ -132,6 +132,6 @@ public class RecipeServiceRetrievalTest {
         assertThat(results.getSize()).isEqualTo(10);
 
         verify(recipeRepository, times(1))
-                .findByCreatedBy_Username(any(Pageable.class), anyString());
+                .findByCreatedBy_UserId(any(Pageable.class), anyLong());
     }
 }

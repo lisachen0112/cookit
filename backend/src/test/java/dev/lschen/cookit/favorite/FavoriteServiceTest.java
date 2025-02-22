@@ -51,10 +51,12 @@ class FavoriteServiceTest {
     User mockUser;
     Favorite favorite;
     RecipeResponse recipeResponse;
+    User newUser;
 
     @BeforeEach
     void setUp() {
         mockUser = User.builder()
+                .userId(1L)
                 .username("testUser")
                 .firstName("Test")
                 .lastName("User")
@@ -100,6 +102,15 @@ class FavoriteServiceTest {
                 null,
                 null
         );
+
+        newUser = User.builder()
+                .userId(2L)
+                .username("newUser")
+                .firstName("Test")
+                .lastName("User")
+                .email("test@example.com")
+                .password("encodedPassword")
+                .build();
     }
 
     @Test
@@ -118,13 +129,6 @@ class FavoriteServiceTest {
 
     @Test
     public void ThrowExceptionWhenFavouringAlreadyFavoritedRecipe() {
-        User newUser = User.builder()
-                .username("newUser")
-                .firstName("Test")
-                .lastName("User")
-                .email("test@example.com")
-                .password("encodedPassword")
-                .build();
         recipe.setCreatedBy(newUser);
         when(authentication.getPrincipal()).thenReturn(mockUser);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
@@ -142,13 +146,6 @@ class FavoriteServiceTest {
 
     @Test
     public void SuccessfullyAddedRecipeToFavorites() {
-        User newUser = User.builder()
-                .username("newUser")
-                .firstName("Test")
-                .lastName("User")
-                .email("test@example.com")
-                .password("encodedPassword")
-                .build();
         recipe.setCreatedBy(newUser);
 
         Favorite expected = Favorite.builder()
@@ -202,11 +199,11 @@ class FavoriteServiceTest {
     @Test
     public void SuccessfullyGetFavoritesByUser() {
         Page<Favorite> recipePage = new PageImpl<>(List.of(favorite), PageRequest.of(0, 10), 1);
-        when(favoriteRepository.findByFavoritedBy_Username(any(Pageable.class), anyString()))
+        when(favoriteRepository.findByFavoritedBy_UserId(any(Pageable.class), anyLong()))
                 .thenReturn(recipePage);
         when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(recipeResponse);
 
-        PageResponse<RecipeResponse> results = favoritedService.findFavoritesByUser(0, 10,"test");
+        PageResponse<RecipeResponse> results = favoritedService.findFavoritesByUserId(0, 10,1L);
 
         assertThat(results.getContent()).isEqualTo(List.of(recipeResponse));
         assertThat(results.getTotalElements()).isEqualTo(1);
@@ -215,6 +212,6 @@ class FavoriteServiceTest {
         assertThat(results.getSize()).isEqualTo(10);
 
         verify(favoriteRepository, times(1))
-                .findByFavoritedBy_Username(any(Pageable.class), anyString());
+                .findByFavoritedBy_UserId(any(Pageable.class), anyLong());
     }
 }

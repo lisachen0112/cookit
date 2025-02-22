@@ -12,5 +12,5 @@ public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
 
     void deleteByRecipeAndFavoritedBy(Recipe recipe, User user);
 
-    Page<Favorite> findByFavoritedBy_Username(Pageable pageable, String username);
+    Page<Favorite> findByFavoritedBy_UserId(Pageable pageable, Long userId);
 }

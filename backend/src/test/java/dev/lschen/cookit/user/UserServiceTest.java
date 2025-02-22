@@ -22,7 +22,6 @@ import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
@@ -54,13 +53,16 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         principal = User.builder()
+                .userId(1L)
                 .username("principal")
                 .build();
         queriedUser = User.builder()
+                .userId(2L)
                 .username("queriedUser")
                 .build();
-        userPublicResponse = new UserPublicResponse(queriedUser.getUsername());
+        userPublicResponse = new UserPublicResponse(queriedUser.getUserId(), queriedUser.getUsername());
         userPrivateResponse = new UserPrivateResponse(
+                principal.getUserId(),
                 principal.getUsername(),
                 null,
                 null,
@@ -85,50 +87,50 @@ class UserServiceTest {
 
     @Test
     public void throwExceptionWhenUserNotFound() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.findUserByUsername("queriedUser", authentication))
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userService.findUserByUserId(2L, authentication))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("User not found");
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
     public void getUserPublicInfoWhenTheRequesterQueriesOtherUserData() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(queriedUser));
         when(authentication.getPrincipal()).thenReturn(principal);
         when(userMapper.toUserPublicResponse(any(User.class))).thenReturn(userPublicResponse);
 
-        UserResponse userResponse = userService.findUserByUsername("queriedUser", authentication);
+        UserResponse userResponse = userService.findUserByUserId(2L, authentication);
         assertThat(userResponse).isInstanceOf(UserPublicResponse.class);
         assertThat(userResponse.username()).isEqualTo(queriedUser.getUsername());
 
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(userMapper, times(1)).toUserPublicResponse(any(User.class));
         verify(userMapper, never()).toUserPrivateResponse(any(User.class));
     }
 
     @Test
     public void getUserPrivateInfoWhenTheRequesterQueriesOwnData() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(principal));
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(principal));
         when(authentication.getPrincipal()).thenReturn(principal);
         when(userMapper.toUserPrivateResponse(any(User.class))).thenReturn(userPrivateResponse);
 
-        UserResponse userResponse = userService.findUserByUsername("principal", authentication);
+        UserResponse userResponse = userService.findUserByUserId(1L, authentication);
         assertThat(userResponse).isInstanceOf(UserPrivateResponse.class);
         assertThat(userResponse.username()).isEqualTo(principal.getUsername());
 
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
         verify(userMapper, never()).toUserPublicResponse(any(User.class));
         verify(userMapper, times(1)).toUserPrivateResponse(any(User.class));
     }
 
     @Test
     public void throwExceptionWhenQueringRecipeOfNonExistentUser() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.findRecipesByUser(0, 10, "nonexistentUser"))
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userService.findRecipesByUserId(0, 10, 3L))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("User not found");
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -143,24 +145,24 @@ class UserServiceTest {
                 true
         );
 
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
-        when(recipeService.findRecipesByUser(anyInt(), anyInt(), anyString())).thenReturn(response);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(queriedUser));
+        when(recipeService.findRecipesByUserId(anyInt(), anyInt(), anyLong())).thenReturn(response);
 
-        PageResponse<RecipeResponse> results = userService.findRecipesByUser(0, 10,"queriedUser");
+        PageResponse<RecipeResponse> results = userService.findRecipesByUserId(0, 10, 2L);
 
         assertThat(results).isEqualTo(response);
 
-        verify(userRepository, times(1)).findByUsername(anyString());
-        verify(recipeService, times(1)).findRecipesByUser(anyInt(), anyInt(), anyString());
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(recipeService, times(1)).findRecipesByUserId(anyInt(), anyInt(), anyLong());
     }
 
     @Test
     public void throwExceptionWhenGettingFavoritedRecipesOfNonExistentUser() {
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.empty());
-        assertThatThrownBy(() -> userService.findFavoritedRecipesByUser(0, 10,"nonexistentUser"))
+        when(userRepository.findById(anyLong())).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> userService.findFavoritedRecipesByUserId(0, 10,3L))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("User not found");
-        verify(userRepository, times(1)).findByUsername(anyString());
+        verify(userRepository, times(1)).findById(anyLong());
     }
 
     @Test
@@ -175,13 +177,13 @@ class UserServiceTest {
                 true
         );
 
-        when(userRepository.findByUsername(anyString())).thenReturn(Optional.of(queriedUser));
-        when(favoriteService.findFavoritesByUser(anyInt(), anyInt(), anyString())).thenReturn(response);
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(queriedUser));
+        when(favoriteService.findFavoritesByUserId(anyInt(), anyInt(), anyLong())).thenReturn(response);
 
-        PageResponse<RecipeResponse> results = userService.findFavoritedRecipesByUser(0, 10,"queriedUser");
+        PageResponse<RecipeResponse> results = userService.findFavoritedRecipesByUserId(0, 10,2L);
 
         assertThat(results).isEqualTo(response);
-        verify(userRepository, times(1)).findByUsername(anyString());
-        verify(favoriteService, times(1)).findFavoritesByUser(anyInt(), anyInt(), anyString());
+        verify(userRepository, times(1)).findById(anyLong());
+        verify(favoriteService, times(1)).findFavoritesByUserId(anyInt(), anyInt(), anyLong());
     }
 }

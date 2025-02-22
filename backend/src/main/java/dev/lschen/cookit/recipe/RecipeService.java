@@ -74,7 +74,7 @@ public class RecipeService {
         Recipe recipe = findRecipeOrThrowException(id);
 
         User user = (User) authentication.getPrincipal();
-        if (!Objects.equals(user.getUsername(), recipe.getCreatedBy().getUsername())) {
+        if (!Objects.equals(user.getUserId(), recipe.getCreatedBy().getUserId())) {
             throw new OperationNotPermittedException("Cannot modify other users recipes");
         }
 
@@ -115,9 +115,9 @@ public class RecipeService {
         recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
     }
 
-    public PageResponse<RecipeResponse> findRecipesByUser(int page, int size, String username) {
+    public PageResponse<RecipeResponse> findRecipesByUserId(int page, int size, Long userId) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
-        Page<Recipe> recipes = recipeRepository.findByCreatedBy_Username(pageable, username);
+        Page<Recipe> recipes = recipeRepository.findByCreatedBy_UserId(pageable, userId);
 
         List<RecipeResponse> response = recipes.stream()
                 .map(recipeMapper::toRecipeResponse)

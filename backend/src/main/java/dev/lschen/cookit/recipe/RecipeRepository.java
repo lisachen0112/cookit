@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface RecipeRepository extends JpaRepository<Recipe, Long> {
     Page<Recipe> findAll(@NonNull Pageable pageable);
-    Page<Recipe> findByCreatedBy_Username(Pageable pageable, String username);
+    Page<Recipe> findByCreatedBy_UserId(Pageable pageable, Long userId);
 }

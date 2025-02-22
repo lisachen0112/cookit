@@ -18,28 +18,28 @@ public class UserService {
     private final RecipeService recipeService;
     private final FavoriteService favoriteService;
 
-    public User getUserOrThrowException(String username) {
-        return userRepository.findByUsername(username)
+    public User getUserOrThrowException(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
     }
 
-    public UserResponse findUserByUsername(String username, Authentication authentication) {
-        User queriedUser = getUserOrThrowException(username);
+    public UserResponse findUserByUserId(Long userId, Authentication authentication) {
+        User queriedUser = getUserOrThrowException(userId);
         User principal = (User) authentication.getPrincipal();
-        if (principal.getUsername().equals(queriedUser.getUsername())) {
+        if (principal.getUserId().equals(queriedUser.getUserId())) {
             return userMapper.toUserPrivateResponse(queriedUser);
         }
         return userMapper.toUserPublicResponse(queriedUser);
     }
 
-    public PageResponse<RecipeResponse> findRecipesByUser(int page, int size, String username) {
-        getUserOrThrowException(username);
-        return recipeService.findRecipesByUser(page, size, username);
+    public PageResponse<RecipeResponse> findRecipesByUserId(int page, int size, Long userId) {
+        getUserOrThrowException(userId);
+        return recipeService.findRecipesByUserId(page, size, userId);
     }
 
-    public PageResponse<RecipeResponse> findFavoritedRecipesByUser(int page, int size, String username) {
-        getUserOrThrowException(username);
-        return favoriteService.findFavoritesByUser(page, size, username);
+    public PageResponse<RecipeResponse> findFavoritedRecipesByUserId(int page, int size, Long userId) {
+        getUserOrThrowException(userId);
+        return favoriteService.findFavoritesByUserId(page, size, userId);
     }
 
 }

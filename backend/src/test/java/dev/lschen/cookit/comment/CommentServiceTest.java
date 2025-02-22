@@ -53,6 +53,7 @@ class CommentServiceTest {
     @BeforeEach
     void setUp() {
         user = User.builder()
+                .userId(1L)
                 .username("test1")
                 .build();
 
@@ -140,6 +141,7 @@ class CommentServiceTest {
         authentication = mock(UsernamePasswordAuthenticationToken.class);
         when(authentication.getPrincipal()).thenReturn(user);
         User otherUser = User.builder()
+                .userId(2L)
                 .username("test2")
                 .build();
         comment.setCommentedBy(otherUser);
@@ -196,6 +198,7 @@ class CommentServiceTest {
         authentication = mock(UsernamePasswordAuthenticationToken.class);
         when(authentication.getPrincipal()).thenReturn(user);
         User otherUser = User.builder()
+                .userId(2L)
                 .username("test2")
                 .build();
         comment.setCommentedBy(otherUser);
@@ -239,7 +242,7 @@ class CommentServiceTest {
     public void successfulGetAllCommentsForRecipe() {
         Page<Comment> commentPage = new PageImpl<>(List.of(comment), PageRequest.of(0, 10), 1);
         when(recipeService.findRecipeOrThrowException(anyLong())).thenReturn(recipe);
-        when(commentRepository.findByRecipe(any(Pageable.class), anyLong())).thenReturn(commentPage);
+        when(commentRepository.findByRecipe_RecipeId(any(Pageable.class), anyLong())).thenReturn(commentPage);
         when(commentMapper.toCommentResponse(any(Comment.class))).thenReturn(commentResponse);
 
         PageResponse<CommentResponse> results = commentService.getAllCommentsForRecipe(1L, 0, 10);
@@ -253,6 +256,6 @@ class CommentServiceTest {
 
         verify(recipeService, times(1)).findRecipeOrThrowException(anyLong());
         verifyNoMoreInteractions(recipeService);
-        verify(commentRepository, times(1)).findByRecipe(any(Pageable.class), anyLong());
+        verify(commentRepository, times(1)).findByRecipe_RecipeId(any(Pageable.class), anyLong());
     }
 }

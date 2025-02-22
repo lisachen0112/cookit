@@ -5,5 +5,5 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
-    Page<Comment> findByRecipe(Pageable pageable, Long recipeId);
+    Page<Comment> findByRecipe_RecipeId(Pageable pageable, Long recipeId);
 }
