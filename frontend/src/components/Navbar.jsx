@@ -8,15 +8,15 @@ import { LuBell } from "react-icons/lu";
 const Navbar = () => {
   return (
     <nav className="text-text-custom fixed top-0 left-0 h-full w-53 flex 
-    flex-col border-r border-gray-300">
+    flex-col border-r border-gray-200">
       <div className="flex items-center justify-start h-20 pl-4">
         <a className="flex items-center" href="/index.html">
           <img className="h-15 w-auto" src={logo} alt="Cookit logo" />
-          <span className="text-2xl font-bold ml-2 text-medium-custom">Cookit</span>
+          <span className="text-3xl ml-2 text-medium-custom font-title font-medium">Cookit</span>
         </a>
       </div>
       <div className="flex flex-col mt-1 space-y-4 px-4">
-        <div>
+        <div className='hover:font-bold'>
           <MdOutlineExplore className='inline ml-2 text-2xl'/>
           <a
             href="/index.html"
@@ -26,7 +26,7 @@ const Navbar = () => {
           </a>
         </div>
 
-        <div>
+        <div className='hover:font-bold'>
           <CgAddR className='inline ml-2 text-2xl'/>
           <a
             href="/jobs.html"
@@ -36,7 +36,7 @@ const Navbar = () => {
           </a>
         </div>
 
-        <div>
+        <div className='hover:font-bold'>
           <LuHeart className='inline ml-2 text-2xl'/>
           <a
             href="/add-job.html"
@@ -47,7 +47,7 @@ const Navbar = () => {
         </div>
 
 
-        <div>
+        <div className='hover:font-bold'>
           <LuBell className='inline ml-2 text-2xl'/>
           <a
             href="/add-job.html"

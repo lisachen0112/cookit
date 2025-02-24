@@ -5,14 +5,15 @@ export default {
       extend: {
         colors: {
           'dark-custom': '#231942',
-          'light-custom': '#9f86c0',
-          'medium-custom': '#5e548e',
+          'light-custom': '#FEFAF6',
+          'medium-custom': '#102C57',
           'white-custom': '#FDF0D5',
           'text-custom': '#484848',
           'text-dark-custom': '#202020',
         },
         fontFamily: {
-          sans: ['Roboto', 'sans-serif'],
+          sans: ['Montserrat', 'sans-serif'],
+          title: ["Oswald", "sans-serif"],
         },
         gridTemplateColumns: {
           '70/30': '70% 28%',
