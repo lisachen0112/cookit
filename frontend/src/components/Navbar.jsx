@@ -1,60 +1,69 @@
 import React from 'react'
 import logo from '../assets/images/logo.png';
+import { NavLink } from 'react-router-dom';
 import { MdOutlineExplore } from "react-icons/md";
 import { CgAddR } from "react-icons/cg";
 import { LuHeart } from "react-icons/lu";
 import { LuBell } from "react-icons/lu";
 
 const Navbar = () => {
+  const linkClass = ({ isActive }) => 
+    isActive 
+      ? 'rounded-md font-bold text-medium-custom' 
+      : 'rounded-md';
+
   return (
     <nav className="text-text-custom fixed top-0 left-0 h-full w-53 flex 
     flex-col border-r border-gray-200">
       <div className="flex items-center justify-start h-20 pl-4">
-        <a className="flex items-center" href="/index.html">
+        <NavLink className="flex items-center" to="/">
           <img className="h-15 w-auto" src={logo} alt="Cookit logo" />
           <span className="text-3xl ml-2 text-medium-custom font-title font-medium">Cookit</span>
-        </a>
+        </NavLink>
       </div>
       <div className="flex flex-col mt-1 space-y-4 px-4">
         <div className='hover:font-bold'>
-          <MdOutlineExplore className='inline ml-2 text-2xl'/>
-          <a
-            href="/index.html"
-            className="rounded-md px-3 py-2"
+          <NavLink
+            to="/"
+            className={linkClass}
           >
+            <MdOutlineExplore className='inline ml-2 text-2xl mr-2'/>
             Explore
-          </a>
+          </NavLink>
         </div>
 
         <div className='hover:font-bold'>
-          <CgAddR className='inline ml-2 text-2xl'/>
-          <a
-            href="/jobs.html"
-            className="rounded-md px-3 py-2"
+          
+          <NavLink
+            to="/create"
+            className={linkClass}
           >
+            <CgAddR className='inline ml-2 text-2xl mr-2'/>
             Create
-          </a>
+          </NavLink>
         </div>
 
         <div className='hover:font-bold'>
-          <LuHeart className='inline ml-2 text-2xl'/>
-          <a
-            href="/add-job.html"
-            className="rounded-md px-3 py-2"
+          
+          <NavLink
+            to="/favorites"
+            className={linkClass}
           >
+            <LuHeart className='inline ml-2 text-2xl mr-2'/>
             Favorites
-          </a>
+          </NavLink>
         </div>
 
 
         <div className='hover:font-bold'>
-          <LuBell className='inline ml-2 text-2xl'/>
-          <a
-            href="/add-job.html"
-            className="rounded-md px-3 py-2"
+         
+          <NavLink
+            to="/notifications"
+            className={linkClass}
           >
+            <LuBell className='inline ml-2 text-2xl mr-2'/>
             Notifications
-          </a>
+          </NavLink>
         </div>
       </div>
     </nav>

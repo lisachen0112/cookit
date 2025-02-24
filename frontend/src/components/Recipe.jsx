@@ -1,6 +1,7 @@
 import React from 'react'
 import { useState } from 'react';
 import { FaPencil, FaRegHeart, FaHeart } from "react-icons/fa6";
+import { Link } from 'react-router-dom';
 
 const Recipe = ({ recipe }) => {
     const [isHeartClicked, setIsHeartClicked] = useState(false);
@@ -18,7 +19,7 @@ const Recipe = ({ recipe }) => {
 
 
   return (
-    <a href={`/recipes/${recipe.recipeId}`} className="bg-white rounded-xl shadow-lg relative border border-gray-100 flex flex-col 
+    <Link to={`/recipes/${recipe.recipeId}`} className="bg-white rounded-xl shadow-lg relative border border-gray-100 flex flex-col 
     hover:bg-light-custom cursor-pointer text-text-custom">
         <div className="p-4 flex-grow">
             <div className="mb-6">
@@ -46,7 +47,7 @@ const Recipe = ({ recipe }) => {
                 </div>
             </div>
         </div>
-    </a>
+    </Link>
   );
 };
 

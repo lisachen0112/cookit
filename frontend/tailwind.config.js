@@ -4,10 +4,8 @@ export default {
     theme: {
       extend: {
         colors: {
-          'dark-custom': '#231942',
           'light-custom': '#FEFAF6',
           'medium-custom': '#102C57',
-          'white-custom': '#FDF0D5',
           'text-custom': '#484848',
           'text-dark-custom': '#202020',
         },
