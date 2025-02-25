@@ -18,53 +18,39 @@ const Navbar = () => {
       <div className="flex items-center justify-start h-20 pl-4">
         <NavLink className="flex items-center" to="/">
           <img className="h-15 w-auto" src={logo} alt="Cookit logo" />
-          <span className="text-3xl ml-2 text-medium-custom font-title font-medium">Cookit</span>
+          <span className="text-3xl ml-2 text-medium-custom font-title font-medium">
+              Cookit
+          </span>
         </NavLink>
       </div>
       <div className="flex flex-col mt-1 space-y-4 px-4">
-        <div className='hover:font-bold'>
-          <NavLink
-            to="/"
-            className={linkClass}
-          >
+        <NavLink to="/" className={linkClass}>
+          <div className='hover:font-bold flex items-center'>
             <MdOutlineExplore className='inline ml-2 text-2xl mr-2'/>
             Explore
-          </NavLink>
-        </div>
-
-        <div className='hover:font-bold'>
+          </div>
+        </NavLink>
           
-          <NavLink
-            to="/create"
-            className={linkClass}
-          >
-            <CgAddR className='inline ml-2 text-2xl mr-2'/>
-            Create
-          </NavLink>
-        </div>
+        <NavLink to="/create" className={linkClass} >
+          <div className='hover:font-bold flex items-center'>
+          <CgAddR className='inline ml-2 text-2xl mr-2'/>
+          Create
+          </div>
+        </NavLink>
 
-        <div className='hover:font-bold'>
-          
-          <NavLink
-            to="/favorites"
-            className={linkClass}
-          >
+        <NavLink to="/favorites" className={linkClass}>
+          <div className='hover:font-bold flex items-center'>
             <LuHeart className='inline ml-2 text-2xl mr-2'/>
             Favorites
-          </NavLink>
-        </div>
+          </div>
+        </NavLink>
 
-
-        <div className='hover:font-bold'>
-         
-          <NavLink
-            to="/notifications"
-            className={linkClass}
-          >
+        <NavLink to="/notifications" className={linkClass}>
+          <div className='hover:font-bold flex items-center'>
             <LuBell className='inline ml-2 text-2xl mr-2'/>
             Notifications
-          </NavLink>
-        </div>
+          </div>
+        </NavLink>
       </div>
     </nav>
   )

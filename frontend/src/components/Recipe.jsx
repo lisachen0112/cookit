@@ -17,9 +17,10 @@ const Recipe = ({ recipe }) => {
         setIsHeartClicked(!isHeartClicked);
     }
 
-
   return (
-    <Link to={`/recipes/${recipe.recipeId}`} className="bg-white rounded-xl shadow-lg relative border border-gray-100 flex flex-col 
+    <Link 
+        to={`/recipes/${recipe.recipeId}`} 
+        className="bg-white rounded-xl shadow-lg relative border border-gray-100 flex flex-col 
     hover:bg-light-custom cursor-pointer text-text-custom">
         <div className="p-4 flex-grow">
             <div className="mb-6">

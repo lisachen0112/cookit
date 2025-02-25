@@ -6,7 +6,10 @@ const MainLayout = () => {
   return (
     <>
         <Navbar />
-        <Outlet />
+        <div className='ml-58 flex-grow'>
+          <Outlet />
+        </div>
+        
     </>
     );
 };

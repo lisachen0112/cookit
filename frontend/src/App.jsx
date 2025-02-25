@@ -7,14 +7,14 @@ import {
 } from 'react-router-dom';
 import Homepage from './pages/Homepage';
 import MainLayout from './layout/MainLayout';
-import RecipePage from './pages/RecipePage';
+import RecipePage, { recipeLoader } from './pages/RecipePage';
 import NotFoundPage from './pages/NotFoundPage';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
   <Route path="/" element={<MainLayout />}>
     <Route index element={<Homepage />} />
-    {/* <Route path="/recipe" element={<RecipePage />} /> */}
+    <Route path="/recipes/:recipeId" element={<RecipePage />} loader={recipeLoader} />
     <Route path="*" element={<NotFoundPage />} /> 
   </Route>
   )
