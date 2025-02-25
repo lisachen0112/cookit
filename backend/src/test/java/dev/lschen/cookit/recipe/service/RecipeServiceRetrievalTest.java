@@ -82,7 +82,6 @@ public class RecipeServiceRetrievalTest {
                 "title",
                 "description",
                 null,
-                null,
                 "test1"
         );
     }

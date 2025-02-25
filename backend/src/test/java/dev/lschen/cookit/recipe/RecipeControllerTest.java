@@ -78,8 +78,7 @@ class RecipeControllerTest {
                 "title",
                 "description",
                 "imageUrl",
-                "videoUrl",
-                null
+                "testUser"
         );
     }
 

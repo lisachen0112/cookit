@@ -5,7 +5,6 @@ public record RecipeListResponse(
         String title,
         String description,
         String imageUrl,
-        String videoUrl,
         String createdBy
 ) {
 }

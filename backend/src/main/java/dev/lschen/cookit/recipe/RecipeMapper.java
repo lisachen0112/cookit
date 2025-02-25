@@ -37,7 +37,6 @@ public class RecipeMapper {
                 recipe.getTitle(),
                 recipe.getDescription(),
                 recipe.getImageUrl(),
-                recipe.getVideoUrl(),
                 recipe.getCreatedBy().getUsername()
         );
     }
