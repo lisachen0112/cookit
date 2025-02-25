@@ -30,4 +30,15 @@ public class RecipeMapper {
                 recipe.getLastModifiedDate()
         );
     }
+
+    public RecipeListResponse toRecipeListResponse(Recipe recipe) {
+        return new RecipeListResponse(
+                recipe.getRecipeId(),
+                recipe.getTitle(),
+                recipe.getDescription(),
+                recipe.getImageUrl(),
+                recipe.getVideoUrl(),
+                recipe.getCreatedBy().getUsername()
+        );
+    }
 }

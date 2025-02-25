@@ -41,11 +41,11 @@ public class RecipeService {
         return recipeMapper.toRecipeResponse(recipe);
     }
 
-    public PageResponse<RecipeResponse> findAll(int page, int size) {
+    public PageResponse<RecipeListResponse> findAll(int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by("lastModifiedDate").descending());
         Page<Recipe> recipes = recipeRepository.findAll(pageable);
-        List<RecipeResponse> response = recipes.stream()
-                .map(recipeMapper::toRecipeResponse)
+        List<RecipeListResponse> response = recipes.stream()
+                .map(recipeMapper::toRecipeListResponse)
                 .toList();
 
         return new PageResponse<>(

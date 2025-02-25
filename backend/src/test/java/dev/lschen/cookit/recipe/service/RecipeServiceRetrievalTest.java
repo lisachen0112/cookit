@@ -41,6 +41,7 @@ public class RecipeServiceRetrievalTest {
 
     private Recipe recipe;
     private RecipeResponse response;
+    private RecipeListResponse listResponse;
 
     @BeforeEach
     void setUp() {
@@ -75,19 +76,28 @@ public class RecipeServiceRetrievalTest {
                 null,
                 null
         );
+
+        listResponse = new RecipeListResponse(
+                1L,
+                "title",
+                "description",
+                null,
+                null,
+                "test1"
+        );
     }
 
     @Test
     public void getAllRecipesFromRepository() {
         Page<Recipe> recipePage = new PageImpl<>(List.of(recipe), PageRequest.of(0, 10), 1);
         when(recipeRepository.findAll(any(Pageable.class))).thenReturn(recipePage);
-        when(recipeMapper.toRecipeResponse(any(Recipe.class))).thenReturn(response);
+        when(recipeMapper.toRecipeListResponse(any(Recipe.class))).thenReturn(listResponse);
 
-        PageResponse<RecipeResponse> results = recipeService.findAll(0, 10);
+        PageResponse<RecipeListResponse> results = recipeService.findAll(0, 10);
 
         verify(recipeRepository, times(1)).findAll(any(Pageable.class));
 
-        assertThat(results.getContent()).isEqualTo(List.of(response));
+        assertThat(results.getContent()).isEqualTo(List.of(listResponse));
         assertThat(results.getTotalElements()).isEqualTo(1);
         assertThat(results.getTotalPages()).isEqualTo(1);
         assertThat(results.getNumber()).isEqualTo(0);

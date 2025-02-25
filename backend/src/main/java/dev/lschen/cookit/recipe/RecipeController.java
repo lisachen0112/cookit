@@ -19,7 +19,7 @@ public class RecipeController {
     private final RecipeService recipeService;
 
     @GetMapping
-    ResponseEntity<PageResponse<RecipeResponse>> getAll(
+    ResponseEntity<PageResponse<RecipeListResponse>> getAll(
             @RequestParam(name = "page", defaultValue = "0", required = false) int page,
             @RequestParam(name = "size", defaultValue = "10", required = false) int size
     ) {

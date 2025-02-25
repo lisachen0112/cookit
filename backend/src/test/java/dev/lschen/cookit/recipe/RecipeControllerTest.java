@@ -15,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.servlet.View;
 
 import java.util.List;
 
@@ -45,8 +44,7 @@ class RecipeControllerTest {
     Recipe recipe;
     RecipeRequest request;
     RecipeResponse response;
-    @Autowired
-    private View error;
+    RecipeListResponse listResponse;
 
     @BeforeEach
     void setUp() {
@@ -75,12 +73,20 @@ class RecipeControllerTest {
                 null,
                 null
         );
+        listResponse = new RecipeListResponse(
+                1L,
+                "title",
+                "description",
+                "imageUrl",
+                "videoUrl",
+                null
+        );
     }
 
     @Test
     public void getAllRecipesEndpointTest() throws Exception {
-        List<RecipeResponse> recipes = List.of(response);
-        PageResponse<RecipeResponse> pageResponse = new PageResponse<>(
+        List<RecipeListResponse> recipes = List.of(listResponse);
+        PageResponse<RecipeListResponse> pageResponse = new PageResponse<>(
                 recipes,
                 0,
                 10,
