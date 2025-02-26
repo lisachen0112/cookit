@@ -4,7 +4,7 @@ import RecipesList from '../components/RecipesList'
 const Homepage = () => {
   return (
     <>
-        <RecipesList />
+      <RecipesList />
     </>
   )
 }

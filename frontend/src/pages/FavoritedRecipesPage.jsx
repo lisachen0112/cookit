@@ -3,14 +3,14 @@ import { useState, useEffect } from 'react';
 import Spinner from '../components/Spinner';
 import RecipeCard from '../components/RecipeCard';
 
-const PersonalRecipesPage = () => {
+const FavoritedRecipesPage = () => {
     const [recipes, setRecipes] = useState({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchRecipes = async () => {
             try {
-                const response = await fetch(`/api/users/103/recipes`);
+                const response = await fetch(`/api/users/103/favorites`);
                 const data = await response.json();
                 setRecipes(data);
                 setLoading(false);
@@ -22,12 +22,12 @@ const PersonalRecipesPage = () => {
         }
         fetchRecipes();
     }, []);
-    
+
   return (
     <section className="bg-white px-4 py-10">
       <div className="container-xl lg:container m-auto">
         <h2 className="text-3xl font-bold text-medium-custom mb-6 text-center font-title">
-          Your fabulous recipes
+          Your favorites
         </h2>
 
         { loading ? (
@@ -44,4 +44,4 @@ const PersonalRecipesPage = () => {
   )
 }
 
-export default PersonalRecipesPage
+export default FavoritedRecipesPage

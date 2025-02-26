@@ -11,6 +11,7 @@ import RecipePage, { recipeLoader } from './pages/RecipePage';
 import NotFoundPage from './pages/NotFoundPage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import PersonalRecipesPage from './pages/PersonalRecipesPage';
+import FavoritedRecipesPage from './pages/FavoritedRecipesPage';
 
 const App = () => {
 
@@ -38,6 +39,7 @@ const App = () => {
       <Route path="/recipes/:recipeId" element={<RecipePage />} loader={recipeLoader} />
       <Route path="/create-recipe" element={<CreateRecipePage postNewRecipeRequest={postRecipe} />} /> 
       <Route path="/your-recipes" element={<PersonalRecipesPage />}/>
+      <Route path="/favorites" element={<FavoritedRecipesPage />}/>
       <Route path="*" element={<NotFoundPage />} /> 
     </Route>
     )
