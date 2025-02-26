@@ -79,9 +79,7 @@ class FavoriteServiceTest {
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(Ingredient.builder()
                 .ingredientId(1L)
-                .name("ingredient")
-                .quantity(10)
-                .measurement("measurement")
+                .content("ingredient")
                 .recipe(recipe)
                 .build());
 

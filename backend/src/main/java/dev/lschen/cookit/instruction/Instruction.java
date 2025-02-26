@@ -34,10 +34,4 @@ public class Instruction {
     @JoinColumn(name = "recipe_id", nullable = false)
     @JsonBackReference("instructions")
     private Recipe recipe;
-
-    public enum ContentType {
-        TEXT,
-        IMAGE,
-        TITLE
-    }
 }

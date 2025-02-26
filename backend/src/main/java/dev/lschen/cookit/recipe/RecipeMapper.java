@@ -11,8 +11,6 @@ public class RecipeMapper {
                 .description(request.description())
                 .imageUrl(request.imageUrl())
                 .videoUrl(request.videoUrl())
-                .ingredients(request.ingredients())
-                .instructions(request.instructions())
                 .build();
     }
 

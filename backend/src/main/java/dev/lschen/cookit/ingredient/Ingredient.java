@@ -18,13 +18,7 @@ public class Ingredient {
     private Long ingredientId;
 
     @Column(nullable = false)
-    private String name;
-
-    @Column(nullable = false)
-    private int quantity;
-
-    @Column(nullable = false)
-    private String measurement;
+    private String content;
 
     @ManyToOne
     @JoinColumn(name = "recipe_id", nullable = false)

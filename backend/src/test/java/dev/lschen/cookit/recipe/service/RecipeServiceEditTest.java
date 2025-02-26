@@ -2,8 +2,10 @@ package dev.lschen.cookit.recipe.service;
 
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.ContentType;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
+import dev.lschen.cookit.instruction.InstructionRequest;
 import dev.lschen.cookit.recipe.*;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
@@ -104,24 +106,30 @@ public class RecipeServiceEditTest {
 
     @Test
     public void UpdateRecipeIfExists() {
-        List<Ingredient> newIngredients = new ArrayList<>();
-        newIngredients.add(Ingredient.builder()
-                .ingredientId(1L)
-                .build());
-
-        List<Instruction> newInstructions = new ArrayList<>();
-        newInstructions.add(Instruction.builder()
-                .orderIndex(0)
-                .build());
+        List<InstructionRequest> instructionsRequest = new ArrayList<>();
+        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "step1"));
 
         RecipeRequest updateRequest = new RecipeRequest(
                 "new title",
                 "new description",
                 "newImageUrl",
                 "newVideoUrl",
-                newIngredients,
-                newInstructions);
+                List.of("ingredient1"),
+                instructionsRequest);
 
+
+        List<Ingredient> newIngredients = new ArrayList<>();
+        newIngredients.add(Ingredient.builder()
+                .ingredientId(1L)
+                .content("ingredient1")
+                .build());
+
+        List<Instruction> newInstructions = new ArrayList<>();
+        newInstructions.add(Instruction.builder()
+                .orderIndex(0)
+                .type(ContentType.TEXT)
+                .content("step1")
+                .build());
         RecipeResponse expectedResponse = new RecipeResponse(
                 1L,
                 "new title",

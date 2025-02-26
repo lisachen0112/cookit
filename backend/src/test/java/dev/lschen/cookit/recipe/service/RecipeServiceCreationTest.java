@@ -1,7 +1,9 @@
 package dev.lschen.cookit.recipe.service;
 
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.ContentType;
 import dev.lschen.cookit.instruction.Instruction;
+import dev.lschen.cookit.instruction.InstructionRequest;
 import dev.lschen.cookit.recipe.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,12 +43,25 @@ public class RecipeServiceCreationTest {
                 .recipeId(1L)
                 .build();
 
+        List<InstructionRequest> instructionsRequest = new ArrayList<>();
+        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "STEP1"));
+
+        request = new RecipeRequest("title",
+                "description",
+                "imageURL",
+                "videoUrl",
+                List.of("ingredient1", "ingredient2"),
+                instructionsRequest
+        );
+
         List<Ingredient> ingredients = new ArrayList<>();
         ingredients.add(Ingredient.builder()
                 .ingredientId(1L)
+                .content("ingredient1")
                 .build());
         ingredients.add(Ingredient.builder()
                 .ingredientId(2L)
+                .content("ingredient2")
                 .build());
         recipe.setIngredients(ingredients);
 
@@ -55,15 +70,6 @@ public class RecipeServiceCreationTest {
                 .recipe(recipe)
                 .build());
         recipe.setInstructions(instructions);
-
-        request = new RecipeRequest("title",
-                "description",
-                "imageURL",
-                "videoUrl",
-                ingredients,
-                instructions
-        );
-
         response = new RecipeResponse(
                 1L,
                 "title",

@@ -3,8 +3,10 @@ package dev.lschen.cookit.recipe;
 import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.ingredient.IngredientRepository;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
+import dev.lschen.cookit.instruction.InstructionRequest;
 import dev.lschen.cookit.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -16,8 +18,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +31,7 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final InstructionRepository instructionRepository;
     private final RecipeMapper recipeMapper;
+    private final IngredientRepository ingredientRepository;
 
     public Recipe findRecipeOrThrowException(Long id) {
         return recipeRepository.findById(id)
@@ -34,8 +40,24 @@ public class RecipeService {
 
     public RecipeResponse createRecipe(RecipeRequest request) {
         Recipe recipe = recipeMapper.toRecipe(request);
-        recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
-        recipe.getInstructions().forEach(instruction -> instruction.setRecipe(recipe));
+        List<Ingredient> ingredients = request.ingredients().stream()
+                        .map(ingredient -> Ingredient.builder()
+                                .content(ingredient)
+                                .recipe(recipe)
+                                .build()
+                        ).toList();
+
+        List<Instruction> instructions = request.instructions().stream()
+                .map(inst -> Instruction.builder()
+                        .orderIndex(inst.orderIndex())
+                        .type(inst.type())
+                        .content(inst.content())
+                        .recipe(recipe)
+                        .build()
+                ).toList();
+
+        recipe.setIngredients(ingredients);
+        recipe.setInstructions(instructions);
         recipeRepository.save(recipe);
 
         return recipeMapper.toRecipeResponse(recipe);
@@ -90,29 +112,64 @@ public class RecipeService {
         if (!Objects.equals(recipe.getVideoUrl(), request.videoUrl())) {
             recipe.setVideoUrl(request.videoUrl());
         }
-        if (!recipe.getIngredients().equals(request.ingredients())) {
+        if (!new HashSet<>(recipe.getIngredients().stream().map(Ingredient::getContent).toList())
+                .equals(new HashSet<>(request.ingredients()))) {
             updateIngredients(recipe, request.ingredients());
         }
 
-        if (!recipe.getInstructions().equals(request.instructions())) {
+        if (!areInstructionsEqual(recipe.getInstructions(), request.instructions())) {
             updateInstructions(recipe, request.instructions());
         }
         recipeRepository.save(recipe);
         return recipeMapper.toRecipeResponse(recipe);
     }
 
-    private void updateInstructions(Recipe recipe, List<Instruction> instructions) {
-        instructionRepository.deleteByRecipe(recipe);
-        instructionRepository.flush();
-        recipe.getInstructions().clear();
-        instructions.forEach(instruction-> instruction.setRecipe(recipe));
-        recipe.getInstructions().addAll(instructions);
+    private boolean areInstructionsEqual(List<Instruction> existing, List<InstructionRequest> newInstructions) {
+        if (existing.size() != newInstructions.size()) {
+            return false;
+        }
+
+        Map<Integer, Instruction> existingMap = existing.stream()
+                .collect(Collectors.toMap(Instruction::getOrderIndex, i -> i));
+
+        Map<Integer, InstructionRequest> newMap = newInstructions.stream()
+                .collect(Collectors.toMap(InstructionRequest::orderIndex, i -> i));
+
+        return existingMap.entrySet().stream().allMatch(entry -> {
+            Instruction existingInstruction = entry.getValue();
+            InstructionRequest newInstruction = newMap.get(entry.getKey());
+            return newInstruction != null
+                    && Objects.equals(existingInstruction.getType(), newInstruction.type())
+                    && Objects.equals(existingInstruction.getContent(), newInstruction.content());
+        });
     }
 
-    private void updateIngredients(Recipe recipe, List<Ingredient> ingredients) {
+    private void updateInstructions(Recipe recipe, List<InstructionRequest> instructionsRequest) {
+        recipe.getInstructions().clear();
+        instructionRepository.deleteByRecipe(recipe);
+        instructionRepository.flush();
+
+        List<Instruction> updatedInstructions = instructionsRequest.stream()
+                .map(inst -> Instruction.builder()
+                        .orderIndex(inst.orderIndex())
+                        .type(inst.type())
+                        .recipe(recipe)
+                        .content(inst.content())
+                        .build()
+                ).toList();
+        recipe.getInstructions().addAll(updatedInstructions);
+    }
+
+    private void updateIngredients(Recipe recipe, List<String> ingredientsRequest) {
         recipe.getIngredients().clear();
-        recipe.getIngredients().addAll(ingredients);
-        recipe.getIngredients().forEach(ingredient -> ingredient.setRecipe(recipe));
+
+        List<Ingredient> updatedIngredients = ingredientsRequest.stream()
+                .map(ingredient -> Ingredient.builder()
+                        .content(ingredient)
+                        .recipe(recipe)
+                        .build())
+                .toList();
+        recipe.getIngredients().addAll(updatedIngredients);
     }
 
     public PageResponse<RecipeResponse> findRecipesByUserId(int page, int size, Long userId) {
