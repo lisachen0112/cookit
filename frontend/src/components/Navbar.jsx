@@ -6,6 +6,7 @@ import { CgAddR } from "react-icons/cg";
 import { LuHeart } from "react-icons/lu";
 import { LuBell } from "react-icons/lu";
 import { LuChefHat } from "react-icons/lu";
+import{ ROUTES }from '../constants/frontend';
 
 const Navbar = () => {
   const linkClass = ({ isActive }) => 
@@ -25,35 +26,35 @@ const Navbar = () => {
         </NavLink>
       </div>
       <div className="flex flex-col mt-1 space-y-4 px-4">
-        <NavLink to="/" className={linkClass}>
+        <NavLink to={ROUTES.HOME} className={linkClass}>
           <div className='hover:font-bold flex items-center'>
             <MdOutlineExplore className='inline ml-2 text-2xl mr-2'/>
             Explore
           </div>
         </NavLink>
           
-        <NavLink to="/create-recipe" className={linkClass} >
+        <NavLink to={ROUTES.CREATE_RECIPE} className={linkClass} >
           <div className='hover:font-bold flex items-center'>
           <CgAddR className='inline ml-2 text-2xl mr-2'/>
           Create
           </div>
         </NavLink>
 
-        <NavLink to="/your-recipes" className={linkClass}>
+        <NavLink to={ROUTES.USER_RECIPES} className={linkClass}>
           <div className='hover:font-bold flex items-center'>
             <LuChefHat className='inline ml-2 text-2xl mr-2'/>
             Your recipes
           </div>
         </NavLink>
 
-        <NavLink to="/favorites" className={linkClass}>
+        <NavLink to={ROUTES.FAVORITES} className={linkClass}>
           <div className='hover:font-bold flex items-center'>
             <LuHeart className='inline ml-2 text-2xl mr-2'/>
             Favorites
           </div>
         </NavLink>
 
-        <NavLink to="/notifications" className={linkClass}>
+        <NavLink to={ROUTES.NOTIFICATIONS} className={linkClass}>
           <div className='hover:font-bold flex items-center'>
             <LuBell className='inline ml-2 text-2xl mr-2'/>
             Notifications

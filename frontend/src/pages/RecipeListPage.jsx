@@ -1,0 +1,54 @@
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import Spinner from "../components/Spinner";
+import RecipesList from "../components/RecipesList";
+
+
+const RecipeListPage = () => {
+  const location = useLocation();
+  const [recipes, setRecipes] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState("");
+
+  // Determine the type of list based on the route
+  const pageType = location.pathname.includes("favorites")
+    ? "favorites"
+    : location.pathname.includes("my-recipes")
+    ? "my-recipes"
+    : "all";
+
+  useEffect(() => {fetchRecipes();}, [pageType]); // Fetch recipes when pageType changes
+
+  const fetchRecipes = async () => {
+    let url = "/api/recipes";
+    setTitle("Browse recipes");
+    if (pageType === "my-recipes") {
+        setTitle("My recipes");
+        url = `/api/users/103/recipes`;
+    }
+    if (pageType === "favorites") {
+        setTitle("Your Favorites");
+        url = `/api/users/103/favorites`;
+    } 
+
+    try {    
+        const response = await fetch(url);
+        const data = await response.json();
+        setRecipes(data);
+    } catch (error) {
+        console.error('Error fetching recipes: ', error);
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  return (
+    <div>
+        {loading ? (<Spinner loading={loading}/>) : (
+        <RecipesList recipes={recipes} title={title}/>
+        )}  
+    </div>
+  );
+};
+
+export default RecipeListPage;

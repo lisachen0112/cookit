@@ -5,13 +5,11 @@ import {
   createRoutesFromElements,
   RouterProvider
 } from 'react-router-dom';
-import Homepage from './pages/Homepage';
 import MainLayout from './layout/MainLayout';
-import RecipePage, { recipeLoader } from './pages/RecipePage';
+import RecipeDetailPage, { recipeLoader } from './pages/RecipeDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CreateRecipePage from './pages/CreateRecipePage';
-import PersonalRecipesPage from './pages/PersonalRecipesPage';
-import FavoritedRecipesPage from './pages/FavoritedRecipesPage';
+import RecipeListPage from './pages/RecipeListPage';
 
 const App = () => {
 
@@ -35,11 +33,12 @@ const App = () => {
   const router = createBrowserRouter(
     createRoutesFromElements(
     <Route path="/" element={<MainLayout />}>
-      <Route index element={<Homepage />} />
-      <Route path="/recipes/:recipeId" element={<RecipePage />} loader={recipeLoader} />
+      <Route index element={<RecipeListPage />} />
+      <Route path="/my-recipes" element={<RecipeListPage />}/>
+      <Route path="/favorites" element={<RecipeListPage />}/>
+      
+      <Route path="/recipes/:recipeId" element={<RecipeDetailPage />} loader={recipeLoader} />
       <Route path="/create-recipe" element={<CreateRecipePage postNewRecipeRequest={postRecipe} />} /> 
-      <Route path="/your-recipes" element={<PersonalRecipesPage />}/>
-      <Route path="/favorites" element={<FavoritedRecipesPage />}/>
       <Route path="*" element={<NotFoundPage />} /> 
     </Route>
     )

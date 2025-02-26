@@ -6,7 +6,7 @@ import Ingredients from '../components/Ingredients';
 import Instructions from '../components/Instructions';
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
 
-const RecipePage = () => {
+const RecipeDetailPage = () => {
   const recipe = useLoaderData();
   const createdDate = new Date(recipe.createdDate);
   let formattedDate;
@@ -99,4 +99,4 @@ const recipeLoader = async  ({ params }) => {
   return data;
 } 
 
-export { RecipePage as default, recipeLoader }; 
+export { RecipeDetailPage as default, recipeLoader }; 

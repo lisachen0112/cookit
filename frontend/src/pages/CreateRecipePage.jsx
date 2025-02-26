@@ -1,7 +1,8 @@
-import { use, useState } from 'react';
+import { useState } from 'react';
 import { FaPlus } from "react-icons/fa6";
 import { FaMinus } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '../constants/frontend';
 
 const CreateRecipePage = ({ postNewRecipeRequest }) => {
     const [title, setTitle] = useState('');
@@ -34,7 +35,7 @@ const CreateRecipePage = ({ postNewRecipeRequest }) => {
             ingredients
         }
         postNewRecipeRequest(newRecipe);
-        return navigate('/your-recipes');
+        return navigate(ROUTES.USER_RECIPES);
     };
 
     return (
