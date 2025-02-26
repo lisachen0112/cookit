@@ -1,9 +1,10 @@
 import React from 'react'
 import { useState } from 'react';
 import { FaPencil, FaRegHeart, FaHeart } from "react-icons/fa6";
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
-const Recipe = ({ recipe }) => {
+const RecipeCard = ({ recipe }) => {
+    const location = useLocation();
     const [isHeartClicked, setIsHeartClicked] = useState(false);
     const isLongDescription = recipe.description.length > 100;
     // const isLongDescription = true;
@@ -20,6 +21,7 @@ const Recipe = ({ recipe }) => {
   return (
     <Link 
         to={`/recipes/${recipe.recipeId}`} 
+        state= {{ from: location.pathname}}
         className="bg-white rounded-xl shadow-lg relative border border-gray-100 flex flex-col 
     hover:bg-light-custom cursor-pointer text-text-custom">
         <div className="p-4 flex-grow">
@@ -52,4 +54,4 @@ const Recipe = ({ recipe }) => {
   );
 };
 
-export default Recipe
+export default RecipeCard

@@ -1,7 +1,7 @@
 import { useLoaderData} from 'react-router-dom';
 import { FaArrowLeft } from 'react-icons/fa';
 import { FaPencil, FaRegHeart, FaHeart } from "react-icons/fa6";
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Ingredients from '../components/Ingredients';
 import Instructions from '../components/Instructions';
 import { format, formatDistanceToNow, isToday, isYesterday } from 'date-fns';
@@ -19,15 +19,23 @@ const RecipePage = () => {
     formattedDate = daysAgo.includes('day') ? daysAgo : format(createdDate, 'MMMM dd, yyyy');
   }
 
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleBackClick = (e) => {
+      e.preventDefault();
+      navigate(location.state?.from || '/');
+  }
+
   return (
     <>
       <section>
         <div className="container pt-6 pl-6">
-          <Link
-            to="/"
+          <button
+            onClick={handleBackClick}
             className="text-medium-custom flex items-center">
             <FaArrowLeft className='mr-2'/>
-          </Link>
+          </button>
         </div>
       </section>
 

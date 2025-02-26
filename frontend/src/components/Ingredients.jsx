@@ -7,7 +7,7 @@ const Ingredients = ({ ingredients }) => {
       <ul className="list-disc list-inside">
         {ingredients.map((ingredient) => (
           <li key={ingredient.ingredientId} className="mb-2">
-            {ingredient.quantity} {ingredient.measurement} {ingredient.name}
+            {ingredient.content}
           </li>
         ))}
       </ul>

@@ -5,6 +5,7 @@ import { MdOutlineExplore } from "react-icons/md";
 import { CgAddR } from "react-icons/cg";
 import { LuHeart } from "react-icons/lu";
 import { LuBell } from "react-icons/lu";
+import { LuChefHat } from "react-icons/lu";
 
 const Navbar = () => {
   const linkClass = ({ isActive }) => 
@@ -31,10 +32,17 @@ const Navbar = () => {
           </div>
         </NavLink>
           
-        <NavLink to="/create" className={linkClass} >
+        <NavLink to="/create-recipe" className={linkClass} >
           <div className='hover:font-bold flex items-center'>
           <CgAddR className='inline ml-2 text-2xl mr-2'/>
           Create
+          </div>
+        </NavLink>
+
+        <NavLink to="/your-recipes" className={linkClass}>
+          <div className='hover:font-bold flex items-center'>
+            <LuChefHat className='inline ml-2 text-2xl mr-2'/>
+            Your recipes
           </div>
         </NavLink>
 
