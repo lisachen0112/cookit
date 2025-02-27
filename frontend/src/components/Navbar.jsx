@@ -7,8 +7,11 @@ import { LuHeart } from "react-icons/lu";
 import { LuBell } from "react-icons/lu";
 import { LuChefHat } from "react-icons/lu";
 import{ ROUTES }from '../constants/frontend';
+import { UserContext } from '../../context/UserContext';
+import { useContext } from 'react';
 
 const Navbar = () => {
+  const { isAuthenticated } = useContext(UserContext);
   const linkClass = ({ isActive }) => 
     isActive 
       ? 'rounded-md font-bold text-medium-custom' 
@@ -32,34 +35,37 @@ const Navbar = () => {
             Explore
           </div>
         </NavLink>
-          
-        <NavLink to={ROUTES.CREATE_RECIPE} className={linkClass} >
-          <div className='hover:font-bold flex items-center'>
-          <CgAddR className='inline ml-2 text-2xl mr-2'/>
-          Create
-          </div>
-        </NavLink>
+        { isAuthenticated && 
+        <>
+          <NavLink to={ROUTES.CREATE_RECIPE} className={linkClass} >
+            <div className='hover:font-bold flex items-center'>
+            <CgAddR className='inline ml-2 text-2xl mr-2'/>
+            Create
+            </div>
+          </NavLink>
 
-        <NavLink to={ROUTES.USER_RECIPES} className={linkClass}>
-          <div className='hover:font-bold flex items-center'>
-            <LuChefHat className='inline ml-2 text-2xl mr-2'/>
-            Your recipes
-          </div>
-        </NavLink>
+          <NavLink to={ROUTES.USER_RECIPES} className={linkClass}>
+            <div className='hover:font-bold flex items-center'>
+              <LuChefHat className='inline ml-2 text-2xl mr-2'/>
+              Your recipes
+            </div>
+          </NavLink>
 
-        <NavLink to={ROUTES.FAVORITES} className={linkClass}>
-          <div className='hover:font-bold flex items-center'>
-            <LuHeart className='inline ml-2 text-2xl mr-2'/>
-            Favorites
-          </div>
-        </NavLink>
+          <NavLink to={ROUTES.FAVORITES} className={linkClass}>
+            <div className='hover:font-bold flex items-center'>
+              <LuHeart className='inline ml-2 text-2xl mr-2'/>
+              Favorites
+            </div>
+          </NavLink>
 
-        <NavLink to={ROUTES.NOTIFICATIONS} className={linkClass}>
-          <div className='hover:font-bold flex items-center'>
-            <LuBell className='inline ml-2 text-2xl mr-2'/>
-            Notifications
-          </div>
-        </NavLink>
+          <NavLink to={ROUTES.NOTIFICATIONS} className={linkClass}>
+            <div className='hover:font-bold flex items-center'>
+              <LuBell className='inline ml-2 text-2xl mr-2'/>
+              Notifications
+            </div>
+          </NavLink>
+        </>
+        }
       </div>
     </nav>
   )

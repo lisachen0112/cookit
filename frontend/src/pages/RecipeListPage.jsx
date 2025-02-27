@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useOutletContext } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import RecipesList from "../components/RecipesList";
 import { useContext } from "react";
 import { UserContext } from "../../context/userContext";
 
-
 const RecipeListPage = () => {
   const location = useLocation();
+  const { openAuthModal } = useOutletContext();
+  const { user, isAuthenticated } = useContext(UserContext);
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
-  const { user } = useContext(UserContext);
 
   const pageType = location.pathname.includes("favorites")
     ? "favorites"
@@ -19,7 +19,14 @@ const RecipeListPage = () => {
     ? "my-recipes"
     : "all";
 
-  useEffect(() => {fetchRecipes();}, [pageType]);
+    useEffect(() => {
+      if (isAuthenticated || pageType === "all") {
+        fetchRecipes();
+      } else {
+        openAuthModal();
+      }
+    }, [pageType, isAuthenticated]);
+  
 
   const fetchRecipes = async () => {
     let url = "/api/recipes";

@@ -11,6 +11,10 @@ const MainLayout = () => {
   const { isAuthenticated, logout } = useContext(UserContext);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
+  const openAuthModal = () => {
+    setIsAuthModalOpen(true);
+  }
+
   return (
     <>
       <header className="flex justify-between items-center p-4">
@@ -45,7 +49,7 @@ const MainLayout = () => {
       </header>
 
       <div className='ml-58 flex-grow'>
-        <Outlet />
+        <Outlet context={{ openAuthModal }} /> 
       </div>
 
       {isAuthModalOpen && <AuthModal closeModal={() => setIsAuthModalOpen(false)} />}
