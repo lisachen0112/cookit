@@ -1,26 +1,44 @@
 import React, {useState, useEffect} from 'react'
 import Navbar from '../components/Navbar';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import AuthModal from '../components/AuthModal';
 import { Toaster } from 'react-hot-toast';
 import logo from '../assets/images/logo.png';
 import { UserContext } from '../../context/userContext';
 import { useContext } from 'react';
+import { FaArrowLeft } from 'react-icons/fa';
 
 const MainLayout = () => {
   const { isAuthenticated, logout } = useContext(UserContext);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const openAuthModal = () => {
     setIsAuthModalOpen(true);
   }
 
+  const isRecipeDetailPage = location.pathname.includes('/recipes/');
+  const handleBackClick = (e) => {
+    e.preventDefault();
+    navigate(-1);
+  };
   return (
     <>
       <header className="flex justify-between items-center p-4">
         <div>
           <Navbar />
         </div>
+
+        {isRecipeDetailPage && (
+        <div className="container pl-35">
+          <button
+            onClick={handleBackClick}
+            className="text-medium-custom flex items-center">
+            <FaArrowLeft className='cursor-pointer'/>
+          </button>
+        </div>
+        )}
 
         <div className='mt-2'>
         {isAuthenticated ? (

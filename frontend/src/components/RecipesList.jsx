@@ -3,7 +3,7 @@ import RecipeCard from './RecipeCard';
 
 const RecipesList = ({ recipes, title }) => {
   return (
-    <section className="bg-white px-4 py-10">
+    <section className="bg-white px-4">
       <div className="container-xl lg:container m-auto">
         <h2 className="text-3xl font-bold text-medium-custom mb-6 text-center font-title">
           { title }
