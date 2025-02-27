@@ -42,4 +42,8 @@ public class UserService {
         return favoriteService.findFavoritesByUserId(page, size, userId);
     }
 
+    public UserPrivateResponse getPrincipalInfo(Authentication authentication) {
+        User principal = (User) authentication.getPrincipal();
+        return userMapper.toUserPrivateResponse(principal);
+    }
 }

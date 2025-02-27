@@ -46,18 +46,20 @@ public class RecipeService {
                                 .recipe(recipe)
                                 .build()
                         ).toList();
-
-        List<Instruction> instructions = request.instructions().stream()
-                .map(inst -> Instruction.builder()
-                        .orderIndex(inst.orderIndex())
-                        .type(inst.type())
-                        .content(inst.content())
-                        .recipe(recipe)
-                        .build()
-                ).toList();
-
         recipe.setIngredients(ingredients);
-        recipe.setInstructions(instructions);
+
+        if (request.instructions() != null && !request.instructions().isEmpty()) {
+            List<Instruction> instructions = request.instructions().stream()
+                    .map(inst -> Instruction.builder()
+                            .orderIndex(inst.orderIndex())
+                            .type(inst.type())
+                            .content(inst.content())
+                            .recipe(recipe)
+                            .build()
+                    ).toList();
+            recipe.setInstructions(instructions);
+        }
+
         recipeRepository.save(recipe);
 
         return recipeMapper.toRecipeResponse(recipe);
