@@ -31,7 +31,6 @@ public class RecipeService {
     private final RecipeRepository recipeRepository;
     private final InstructionRepository instructionRepository;
     private final RecipeMapper recipeMapper;
-    private final IngredientRepository ingredientRepository;
 
     public Recipe findRecipeOrThrowException(Long id) {
         return recipeRepository.findById(id)
