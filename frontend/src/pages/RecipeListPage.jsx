@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import Spinner from "../components/Spinner";
 import RecipesList from "../components/RecipesList";
+import { useContext } from "react";
+import { UserContext } from "../../context/userContext";
 
 
 const RecipeListPage = () => {
@@ -9,26 +11,26 @@ const RecipeListPage = () => {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
+  const { user } = useContext(UserContext);
 
-  // Determine the type of list based on the route
   const pageType = location.pathname.includes("favorites")
     ? "favorites"
     : location.pathname.includes("my-recipes")
     ? "my-recipes"
     : "all";
 
-  useEffect(() => {fetchRecipes();}, [pageType]); // Fetch recipes when pageType changes
+  useEffect(() => {fetchRecipes();}, [pageType]);
 
   const fetchRecipes = async () => {
     let url = "/api/recipes";
     setTitle("Browse recipes");
     if (pageType === "my-recipes") {
         setTitle("My recipes");
-        url = `/api/users/103/recipes`;
+        url = `/api/users/${user.userId}/recipes`;
     }
     if (pageType === "favorites") {
         setTitle("Your Favorites");
-        url = `/api/users/103/favorites`;
+        url = `/api/users/${user.userId}/favorites`;
     } 
 
     try {    

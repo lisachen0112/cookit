@@ -95,7 +95,6 @@ const RecipeDetailPage = () => {
 const recipeLoader = async  ({ params }) => {
   const res = await fetch(`/api/recipes/${params.recipeId}`);
   const data = await res.json();
-  console.log(data);
   return data;
 } 
 
