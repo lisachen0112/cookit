@@ -3,7 +3,6 @@ package dev.lschen.cookit.recipe;
 import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
-import dev.lschen.cookit.ingredient.IngredientRepository;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
 import dev.lschen.cookit.instruction.InstructionRequest;
