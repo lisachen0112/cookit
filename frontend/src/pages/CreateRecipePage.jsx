@@ -1,40 +1,80 @@
 import { useState } from 'react';
-import { FaPlus } from "react-icons/fa6";
-import { FaMinus } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/frontend';
+import IngredientsForm from '../components/createRecipe/IngredientsForm';
+import InstructionsForm from '../components/createRecipe/InstructionsForm';
+import { toast } from 'react-hot-toast';
 
-const CreateRecipePage = ({ postNewRecipeRequest }) => {
+const CreateRecipePage = () => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [ingredients, setIngredients] = useState(['']);
-    const [instructions, setInstructions] = useState(['']);
+    const [instructions, setInstructions] = useState([{ type: "TITLE", content: "" }]);
     const navigate = useNavigate();
 
-    const handleIngredientChange = (index, event) => {
-        const newIngredients = [...ingredients];
-        newIngredients[index] = event.target.value;
-        setIngredients(newIngredients);
+
+    const postRecipe = async (newRecipe) => {
+        console.log(newRecipe);
+        try {
+          const jwtToken = localStorage.getItem('token');
+          const response = await fetch('/api/recipes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${jwtToken}`,
+            },
+            body: JSON.stringify(newRecipe),
+          });
+        } catch (error) {
+          console.error('Failed to post recipe', error);
+          toast.error('Failed to post recipe');
+        }
     };
 
-    const handleAddIngredient = () => {
-        setIngredients([...ingredients, '']);
+    const uploadImage = async (file) => {
+        const jwtToken = localStorage.getItem('token');
+        const formData = new FormData();
+        formData.append("file", file);
+        
+        const response = await fetch("/api/media/upload/instructions", {
+            headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+            },
+            method: "POST",
+            body: formData,
+        });
+    
+        if (!response.ok) {
+            throw new Error("Image upload failed");
+        }
+        const imageUrl = await response.text();
+        return imageUrl;
     };
 
-    const handleRemoveIngredient = (index) => {
-        const newIngredients = [...ingredients];
-        newIngredients.splice(index, 1);
-        setIngredients(newIngredients);
-    };
-
-    const submitForm = (e) => {
+    const submitForm = async (e) => {
         e.preventDefault();
+        const updatedInstructions = await Promise.all(
+            instructions.map(async (instruction, index) => {
+                if (instruction.type === "IMAGE" && instruction.content) {
+                    try {
+                        const imageUrl = await uploadImage(instruction.content);
+                        return { ...instruction, content: imageUrl, orderIndex: index };
+                    } catch (error) {
+                        console.error("Failed to upload image", error);
+                        toast.error("Failed to upload image");
+                        return { ...instruction, orderIndex: index }; 
+                    }
+                }
+                return { ...instruction, orderIndex: index }; 
+            })
+        );
         const newRecipe = {
             title,
             description,
-            ingredients
+            ingredients,
+            instructions: updatedInstructions,
         }
-        postNewRecipeRequest(newRecipe);
+        postRecipe(newRecipe);
         return navigate(ROUTES.USER_RECIPES);
     };
 
@@ -79,42 +119,8 @@ const CreateRecipePage = ({ postNewRecipeRequest }) => {
                     ></textarea>
                 </div>
 
-                <div className='mb-4'>
-                    <label 
-                        htmlFor='ingredients'
-                        className='block text-gray-700 font-bold mb-2'>
-                        Ingredients
-                    </label>
-                    {ingredients.map((ingredient, index) => (
-                            <div key={index} className="flex items-center mb-2">
-                                <input
-                                    type='text'
-                                    className='border rounded w-full py-2 px-3'
-                                    placeholder='250g flour'
-                                    value={ingredient}
-                                    onChange={(e) => handleIngredientChange(index, e)}
-                                />
-                                <button
-                                    type="button"
-                                    className="ml-2 text-red-600 font-bold py-2 px-4 
-                                    focus:outline-none focus:shadow-outline cursor-pointer"
-                                    onClick={() => handleRemoveIngredient(index)}
-                                >
-                                    <FaMinus />
-                                </button>
-                            </div>
-                        ))}
-                    <button
-                        type="button"
-                        className="font-bold py-2 px-4 rounded-full focus:outline-none 
-                        focus:shadow-outline"
-                        onClick={handleAddIngredient}
-                    >
-                        <FaPlus className='inline'/>
-                        <span className="ml-2">Add Ingredient</span>
-                    </button>
-                </div>
-
+                <IngredientsForm ingredients={ingredients} setIngredients={setIngredients} />
+                <InstructionsForm instructions={instructions} setInstructions={setInstructions} />
                 <div>
                     <button
                     className="bg-medium-custom text-white font-bold py-2 px-4 rounded-full w-full 
