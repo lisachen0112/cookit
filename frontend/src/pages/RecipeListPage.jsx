@@ -25,7 +25,7 @@ const RecipeListPage = () => {
       } else {
         openAuthModal();
       }
-    }, [pageType, isAuthenticated]);
+    }, [pageType]);
   
 
   const fetchRecipes = async () => {

@@ -39,10 +39,11 @@ const CreateRecipePage = ({ postNewRecipeRequest }) => {
     };
 
     return (
-        <section>
-            <div className="bg-white px-6 py-8 mb-4 m-4 md:m-0">
-                <form onSubmit={submitForm}>
-                <h2 className="text-3xl text-center font-semibold mb-6">Add Recipe</h2>
+            <div className="flex justify-center items-start h-full">
+                <form onSubmit={submitForm} className="w-3/4">
+                <h1 className="text-3xl text-center font-bold mb-6 text-medium-custom font-title">
+                    Add Recipe
+                </h1>
                 <div className="mb-4">
                     <label 
                         htmlFor='title'
@@ -125,7 +126,7 @@ const CreateRecipePage = ({ postNewRecipeRequest }) => {
                 </div>
                 </form>
             </div>
-        </section>
+
     )
 }
 

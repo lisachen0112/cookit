@@ -23,6 +23,12 @@ const MainLayout = () => {
     e.preventDefault();
     navigate(-1);
   };
+
+  const handleLogout = () => {
+    navigate('/');
+    logout();
+  }
+
   return (
     <>
       <header className="flex justify-between items-center p-4">
@@ -49,7 +55,7 @@ const MainLayout = () => {
                 className="w-10 h-10 rounded-full cursor-pointer"
               />
               <button
-                onClick={logout}
+                onClick={handleLogout}
                 className="bg-red-500 text-white py-1 px-3 rounded pointer-cursor"
               >
                 Logout

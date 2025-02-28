@@ -6,7 +6,6 @@ export function UserContextProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-
     useEffect(() => {
         if (!user) {
             const token = localStorage.getItem('token');
