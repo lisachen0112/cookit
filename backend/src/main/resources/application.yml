@@ -32,6 +32,9 @@ spring:
   servlet:
     multipart:
       max-file-size: 50MB
+  web:
+    resources:
+      static-locations: classpath:/public/
 
 springdoc:
   default-produces-media-type: application/json

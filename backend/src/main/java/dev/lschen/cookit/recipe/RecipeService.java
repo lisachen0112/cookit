@@ -3,6 +3,7 @@ package dev.lschen.cookit.recipe;
 import dev.lschen.cookit.common.PageResponse;
 import dev.lschen.cookit.exception.OperationNotPermittedException;
 import dev.lschen.cookit.ingredient.Ingredient;
+import dev.lschen.cookit.instruction.ContentType;
 import dev.lschen.cookit.instruction.Instruction;
 import dev.lschen.cookit.instruction.InstructionRepository;
 import dev.lschen.cookit.instruction.InstructionRequest;
@@ -17,6 +18,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -86,9 +91,34 @@ public class RecipeService {
         return recipeMapper.toRecipeResponse(recipe);
     }
 
-    public void deleteById(Long id) {
-        findRecipeOrThrowException(id);
+    public void deleteById(Long id, Authentication authentication) {
+        Recipe recipe = findRecipeOrThrowException(id);
+        User user = (User) authentication.getPrincipal();
+        if (!Objects.equals(user.getUserId(), recipe.getCreatedBy().getUserId())) {
+            throw new OperationNotPermittedException("Cannot delete other users recipes");
+        }
+
+        List<Instruction> instructions = recipe.getInstructions();
+        for (Instruction instruction : instructions) {
+            if ((instruction.getType() == ContentType.IMAGE) && (instruction.getContent() != null)) {
+                String imageFileName = instruction.getContent();
+                deleteImage(imageFileName);
+            }
+        }
         recipeRepository.deleteById(id);
+    }
+
+    private void deleteImage(String imageFileName) {
+        String imagePath = "backend/src/main/resources/public/uploads/" + imageFileName;
+        Path path = Paths.get(imagePath);
+
+        try {
+            Files.deleteIfExists(path);
+            System.out.println("Image deleted: " + imagePath);
+        } catch (IOException e) {
+            System.err.println("Failed to delete image: " + imagePath);
+            e.printStackTrace();
+        }
     }
 
     @Transactional

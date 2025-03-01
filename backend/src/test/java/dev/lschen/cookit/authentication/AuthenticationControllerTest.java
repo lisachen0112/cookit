@@ -56,7 +56,7 @@ class AuthenticationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(asJsonString(request)))
                 .andDo(print())
-                .andExpect(status().isAccepted())
+                .andExpect(status().isCreated())
                 .andReturn();
     }
 

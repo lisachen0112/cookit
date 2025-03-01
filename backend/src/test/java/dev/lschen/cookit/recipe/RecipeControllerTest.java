@@ -133,11 +133,12 @@ class RecipeControllerTest {
 
     @Test
     public void deleteRecipeByIdEndpointTest() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/{id}", 1L))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/recipes/{id}", 1L)
+                        .principal(authentication))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
-        verify(recipeService, times(1)).deleteById(1L);
+        verify(recipeService, times(1)).deleteById(1L, any(Authentication.class));
     }
 
     @Test
