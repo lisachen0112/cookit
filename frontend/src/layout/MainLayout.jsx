@@ -7,6 +7,7 @@ import logo from '../assets/images/logo.png';
 import { UserContext } from '../../context/userContext';
 import { useContext } from 'react';
 import { FaArrowLeft } from 'react-icons/fa';
+import { ROUTES } from '../constants/frontend';
 
 const MainLayout = () => {
   const { isAuthenticated, logout } = useContext(UserContext);
@@ -21,7 +22,12 @@ const MainLayout = () => {
   const isRecipeDetailPage = location.pathname.includes('/recipes/');
   const handleBackClick = (e) => {
     e.preventDefault();
-    navigate(-1);
+    if (location.state?.isCreatedOrEdited) {
+      navigate(ROUTES.USER_RECIPES);
+    } else {
+      navigate(-1);
+    }
+    
   };
 
   const handleLogout = () => {

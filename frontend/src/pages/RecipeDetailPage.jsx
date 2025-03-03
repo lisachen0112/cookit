@@ -1,4 +1,4 @@
-import { useLoaderData} from 'react-router-dom';
+import { Link, useLoaderData} from 'react-router-dom';
 import { FaPencil, FaRegHeart, FaHeart } from "react-icons/fa6";
 import Ingredients from '../components/Ingredients';
 import Instructions from '../components/Instructions';
@@ -37,10 +37,13 @@ const RecipeDetailPage = () => {
                 </h1>
 
                 {user && user.username === recipe.createdBy ? (
-                  <button className="text-gray-500 hover:text-black">
+                  <Link 
+                  to={`/edit-recipe/${recipe.recipeId}`}
+                  state={{ recipe }}
+                  className="text-gray-500 hover:text-black">
                     <FaPencil className="inline mr-2" />
                     Edit this recipe
-                  </button>
+                  </Link>
                 ) : (
                   <div className="cursor-pointer" onClick={handleHeartClick}>
                       {isHeartClicked ? (

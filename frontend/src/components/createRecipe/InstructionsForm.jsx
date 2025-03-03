@@ -7,7 +7,7 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
     const image = "IMAGE";
 
     const handleAddInstruction = (type) => {
-        setInstructions([...instructions, { type, content: "" }]);
+        setInstructions([...instructions, { type, content: "", media: null }]);
     };
 
     const handleInstructionChange = (index, value) => {
@@ -18,8 +18,8 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
 
     const handleRemoveInstruction = (index) => {
         const instruction = instructions[index];
-        if (instruction.type === image && instruction.content) {
-            URL.revokeObjectURL(instruction.content);
+        if (instruction.type === image && instruction.media) {
+            URL.revokeObjectURL(instruction.media);
         }
         
         setInstructions(instructions.filter((_, i) => i !== index));
@@ -27,10 +27,9 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
 
     const handleFileChange = (index, file) => {
         const updatedInstructions = [...instructions];
-        updatedInstructions[index].content = file;
+        updatedInstructions[index].media = file;
         setInstructions(updatedInstructions);
     }
-
 
   return (
     <div className="mb-4 ">
@@ -46,7 +45,7 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
                     type="text"
                     className="border rounded w-full py-2 px-3 mb-2 font-bold"
                     placeholder="Step Title"
-                    value={instruction.title}
+                    value={instruction.content}
                     onChange={(e) => handleInstructionChange(index, e.target.value)}
                     />
                 )}
@@ -60,20 +59,30 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
                 )}
                 {instruction.type === image && (
                     <div className="flex flex-col justify-center items-center w-full">
-                        {instruction.content && (
+                        {instruction.media &&
+                          (
                             <img
-                                src={URL.createObjectURL(instruction.content)}
-                                alt="Preview"
-                                className="w-100 h-100 object-cover rounded"
+                              src={URL.createObjectURL(instruction.media)}
+                              alt="Preview"
+                              className="w-100 h-100 object-cover rounded"
                             />
-                            )
-                        }
-                        <input
-                            type="file"
-                            accept="image/*"
-                            className="border rounded py-2 px-3 my-2"
-                            onChange={(e) => handleFileChange(index, e.target.files[0])}
-                        />
+                          )}
+                          {!instruction.media && instruction.content && (
+                            <img
+                              src={"http://localhost:8088/api/v1/uploads/instructions/" + instruction.content}
+                              alt="Preview"
+                              className="w-100 h-100 object-cover rounded"
+                            />
+                          )}
+                          {/* Show the input when adding photo, don't show if the image has been uploaded already */}
+                          {instruction.content === "" && (
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="border rounded py-2 px-3 my-2"
+                              onChange={(e) => handleFileChange(index, e.target.files[0])}
+                            />
+                          )}
                     </div>
                 )}
                 <button
@@ -84,7 +93,6 @@ const InstructionsForm = ({ instructions, setInstructions}) => {
                     <FaMinus />
                 </button>
             </div>
-
         </div>
       ))}
 

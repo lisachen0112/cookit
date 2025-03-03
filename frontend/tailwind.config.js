@@ -8,6 +8,7 @@ export default {
           'medium-custom': '#102C57',
           'text-custom': '#484848',
           'text-dark-custom': '#202020',
+          'red-custom': '#c1121f'
         },
         fontFamily: {
           sans: ['Montserrat', 'sans-serif'],

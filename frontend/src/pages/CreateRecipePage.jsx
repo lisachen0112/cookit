@@ -1,81 +1,70 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '../constants/frontend';
 import IngredientsForm from '../components/createRecipe/IngredientsForm';
 import InstructionsForm from '../components/createRecipe/InstructionsForm';
 import { toast } from 'react-hot-toast';
+import { UserContext } from "../../context/userContext";
+
 
 const CreateRecipePage = () => {
+    const { user } = useContext(UserContext);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [ingredients, setIngredients] = useState(['']);
-    const [instructions, setInstructions] = useState([{ type: "TITLE", content: "" }]);
+    const [instructions, setInstructions] = useState([{ type: "TITLE", content: "", media: null }]);
     const navigate = useNavigate();
 
 
     const postRecipe = async (newRecipe) => {
-        console.log(newRecipe);
         try {
-          const jwtToken = localStorage.getItem('token');
-          const response = await fetch('/api/recipes', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${jwtToken}`,
-            },
-            body: JSON.stringify(newRecipe),
-          });
+            const jwtToken = localStorage.getItem('token');
+            const response = await fetch('/api/recipes', {
+                method: 'POST',
+                headers: {
+                'Authorization': `Bearer ${jwtToken}`,
+                },
+                body: newRecipe,
+            });
+            if (!response.ok) {
+                toast.error('Failed to post recipe');
+                throw new Error('Failed to post recipe');
+            }
+            toast.success('Recipe created successfully');
+            const location = response.headers.get('Location');
+            if (location) {
+                return location;
+            }
         } catch (error) {
           console.error('Failed to post recipe', error);
           toast.error('Failed to post recipe');
         }
     };
 
-    const uploadImage = async (file) => {
-        const jwtToken = localStorage.getItem('token');
-        const formData = new FormData();
-        formData.append("file", file);
-        
-        const response = await fetch("/api/media/upload/instructions", {
-            headers: {
-                'Authorization': `Bearer ${jwtToken}`,
-            },
-            method: "POST",
-            body: formData,
-        });
-    
-        if (!response.ok) {
-            throw new Error("Image upload failed");
-        }
-        const imageUrl = await response.text();
-        return imageUrl;
-    };
-
     const submitForm = async (e) => {
         e.preventDefault();
-        const updatedInstructions = await Promise.all(
-            instructions.map(async (instruction, index) => {
-                if (instruction.type === "IMAGE" && instruction.content) {
-                    try {
-                        const imageUrl = await uploadImage(instruction.content);
-                        return { ...instruction, content: imageUrl, orderIndex: index };
-                    } catch (error) {
-                        console.error("Failed to upload image", error);
-                        toast.error("Failed to upload image");
-                        return { ...instruction, orderIndex: index }; 
-                    }
-                }
-                return { ...instruction, orderIndex: index }; 
-            })
-        );
-        const newRecipe = {
-            title,
-            description,
-            ingredients,
-            instructions: updatedInstructions,
-        }
-        postRecipe(newRecipe);
-        return navigate(ROUTES.USER_RECIPES);
+
+        const formData = new FormData()
+        formData.append('title', title);
+        formData.append('description', description);
+        ingredients.forEach((ingredient, index) => {
+            formData.append(`ingredients[${index}]`, ingredient);
+        });
+        
+        instructions.forEach((instruction, index) => {
+            formData.append(`instructions[${index}].orderIndex`, index);
+            formData.append(`instructions[${index}].type`, instruction.type);
+            formData.append(`instructions[${index}].content`, instruction.content);
+            if (instruction.media) {
+                formData.append(`instructions[${index}].media`, instruction.media);
+            }
+        });
+
+        const newRecipeLocation = await postRecipe(formData);
+        console.log(newRecipeLocation);
+        return navigate(newRecipeLocation ? newRecipeLocation : ROUTES.USER_RECIPES, {
+            state: { isCreatedOrEdited: true}
+        });
     };
 
     return (
@@ -132,7 +121,6 @@ const CreateRecipePage = () => {
                 </div>
                 </form>
             </div>
-
     )
 }
 

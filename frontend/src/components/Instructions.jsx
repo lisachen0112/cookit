@@ -14,7 +14,7 @@ const Instructions = ({ instructions }) => {
             {instruction.type === 'IMAGE' && instruction.content && (
               <div className="flex justify-center">
                 <img
-                  src={"http://localhost:8088/api/v1/uploads/" + instruction.content}
+                  src={"http://localhost:8088/api/v1/uploads/instructions/" + instruction.content}
                   alt="Instruction image"
                   className="max-w-full h-auto rounded"
                   style={{ maxHeight: '300px', objectFit: 'contain' }}

@@ -10,6 +10,7 @@ import RecipeDetailPage, { recipeLoader } from './pages/RecipeDetailPage';
 import NotFoundPage from './pages/NotFoundPage';
 import CreateRecipePage from './pages/CreateRecipePage';
 import RecipeListPage from './pages/RecipeListPage';
+import EditRecipePage from './pages/EditRecipePage';
 import { UserContextProvider } from '../context/userContext';
 
 const App = () => {
@@ -25,6 +26,7 @@ const App = () => {
         
         <Route path="/recipes/:recipeId" element={<RecipeDetailPage />} loader={recipeLoader} />
         <Route path="/create-recipe" element={<CreateRecipePage />} /> 
+        <Route path="/edit-recipe/:recipeId" element={<EditRecipePage />} />
         <Route path="*" element={<NotFoundPage />} /> 
       </Route>
     )
