@@ -9,7 +9,6 @@ public class RecipeMapper {
         return Recipe.builder()
                 .title(request.title())
                 .description(request.description())
-                .imageUrl(request.imageUrl())
                 .videoUrl(request.videoUrl())
                 .build();
     }

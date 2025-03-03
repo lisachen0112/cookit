@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,11 +45,11 @@ public class RecipeServiceCreationTest {
                 .build();
 
         List<InstructionRequest> instructionsRequest = new ArrayList<>();
-        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "STEP1"));
+        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "STEP1", null));
 
         request = new RecipeRequest("title",
                 "description",
-                "imageURL",
+                null,
                 "videoUrl",
                 List.of("ingredient1", "ingredient2"),
                 instructionsRequest
@@ -85,7 +86,7 @@ public class RecipeServiceCreationTest {
     }
 
     @Test
-    public void createRecipeSuccessfullyFromRequest() {
+    public void createRecipeSuccessfullyFromRequest() throws IOException {
         when(recipeMapper.toRecipe(any(RecipeRequest.class))).thenReturn(recipe);
         when(recipeRepository.save(any(Recipe.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

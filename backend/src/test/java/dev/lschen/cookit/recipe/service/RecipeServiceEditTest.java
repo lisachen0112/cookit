@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -105,14 +106,14 @@ public class RecipeServiceEditTest {
     }
 
     @Test
-    public void UpdateRecipeIfExists() {
+    public void UpdateRecipeIfExists() throws IOException {
         List<InstructionRequest> instructionsRequest = new ArrayList<>();
-        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "step1"));
+        instructionsRequest.add(new InstructionRequest(0, ContentType.TEXT, "step1", null));
 
         RecipeRequest updateRequest = new RecipeRequest(
                 "new title",
                 "new description",
-                "newImageUrl",
+                null,
                 "newVideoUrl",
                 List.of("ingredient1"),
                 instructionsRequest);
